@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wendy — Business Assistentin</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="app">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-name">Wendy Whitfield</div>
+                <div class="brand-sub">Business Assistentin</div>
+            </div>
+
+            <nav class="sidebar-nav">
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Personal Brand</div>
+                    <a class="nav-item" data-section="brand-merkmale">Brand Merkmale</a>
+                    <a class="nav-item" data-section="brand-voice">Brand Voice</a>
+                    <a class="nav-item" data-section="brand-story">Brand Story</a>
+                    <a class="nav-item" data-section="positionierung">Positionierung</a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Content</div>
+                    <a class="nav-item" data-section="linkedin-facebook">LinkedIn & Facebook</a>
+                    <a class="nav-item" data-section="instagram-hooks">Instagram — Hooks</a>
+                    <a class="nav-item" data-section="instagram-captions">Instagram — Captions</a>
+                    <a class="nav-item" data-section="karussells">Karussells</a>
+                    <a class="nav-item" data-section="whatsapp-kanal">WhatsApp Kanal</a>
+                    <a class="nav-item" data-section="newsletter">Newsletter</a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Vertrieb</div>
+                    <a class="nav-item" data-section="linkedin-akquise">LinkedIn Akquise</a>
+                    <a class="nav-item" data-section="email-akquise">E-Mail Akquise</a>
+                    <a class="nav-item" data-section="setting-call">Setting Call Vorbereitung</a>
+                    <a class="nav-item" data-section="verkaufsgespraech">Verkaufsgespräch & Closing</a>
+                    <a class="nav-item" data-section="follow-ups">Follow-Ups</a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Angebot</div>
+                    <a class="nav-item" data-section="ideen-entwicklung">Ideen & Entwicklung</a>
+                    <a class="nav-item" data-section="embodybrand-programm">EmbodyBRAND — Mein Programm</a>
+                    <a class="nav-item" data-section="schulungen-workshops">Schulungen & Workshops</a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Kundinnen</div>
+                    <a class="nav-item" data-section="session-vorbereitung">Session Vorbereitung</a>
+                    <a class="nav-item" data-section="inhalte-klientinnen">Inhalte erstellen</a>
+                    <a class="nav-item" data-section="kundin-a">1 — Kundin A</a>
+                    <a class="nav-item" data-section="kundin-b">2 — Kundin B</a>
+                    <a class="nav-item" data-section="kundin-c">3 — Kundin Z</a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Strategie</div>
+                    <a class="nav-item" data-section="business-strategie">Business Strategie</a>
+                    <a class="nav-item" data-section="content-strategie">Content Strategie</a>
+                    <a class="nav-item" data-section="verkaufsstrategie">Verkaufsstrategie</a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Wachstum</div>
+                    <a class="nav-item" data-section="check-in">Check-In</a>
+                    <a class="nav-item" data-section="check-out">Check-Out</a>
+                    <a class="nav-item" data-section="todos-morgen">To-Do's für morgen</a>
+                    <a class="nav-item" data-section="todos-woche">To-Do's für die Woche</a>
+                    <a class="nav-item" data-section="woechentliche-reflexion">Wöchentliche Reflexion</a>
+                    <a class="nav-item" data-section="monatliche-reflexion">Monatliche Reflexion</a>
+                    <a class="nav-item" data-section="quartalsreflexion">Quartalsreflexion</a>
+                    <a class="nav-item" data-section="jahresreflexion">Jahresreflexion</a>
+                </div>
+
+            </nav>
+        </aside>
+
+        <!-- MAIN CHAT -->
+        <main class="main">
+            <div class="chat-header">
+                <span class="chat-section-label" id="sectionLabel">Business Strategie</span>
+                <button class="hub-toggle" id="hubToggle">Mein Hub</button>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <div class="welcome-message">
+                    <p>Hallo Wendy — wähle links einen Bereich und starte.</p>
+                </div>
+            </div>
+
+            <div class="chat-input-area">
+                <div class="chat-input-wrapper">
+                    <textarea
+                        id="chatInput"
+                        placeholder="Schreib oder sprich..."
+                        rows="1"
+                    ></textarea>
+                    <button class="mic-btn" id="micBtn" title="Sprechen">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                            <line x1="12" y1="19" x2="12" y2="23"/>
+                            <line x1="8" y1="23" x2="16" y2="23"/>
+                        </svg>
+                    </button>
+                    <button class="send-btn" id="sendBtn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="22" y1="2" x2="11" y2="13"/>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- HUB PANEL -->
+        <aside class="hub-panel" id="hubPanel">
+            <div class="hub-header">
+                <span>Mein Hub</span>
+                <button id="hubClose">✕</button>
+            </div>
+            <div class="hub-content" id="hubContent">
+                Lädt...
+            </div>
+        </aside>
+
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
