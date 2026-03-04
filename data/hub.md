@@ -19,12 +19,17 @@ Ich helfe etablierten, selbstständigen Frauen eine unverwechselbare Personal Br
 
 ## Was gerade aktuell ist
 - LinkedIn-Akquise läuft seit 02.03. (15/Tag)
-- Infocall mit Testkunden: 11.03.2026
+- Infocall mit Testkunden: 11.03.2026 — App live zeigen!
 - Start Testkunden: 23.03.2026
-- Webinar: Mitte März 2026
+- Webinar: Mitte März 2026 — fertig vorbereitet ✅
 
 ## Offene To-Do's diese Woche
-[Wird beim Check-Out befüllt]
+- Marykate-Schrift (.ttf/.otf) in static/fonts/ ablegen
+- App auf Railway oder Render deployen für Infocall-Demo
+- Hub mit Brand Voice + Positionierung befüllen (nach EmbodyBRAND Woche 1-8)
 
 ## Wichtige Entscheidungen
-[Werden durch "Speichere das" oder Shutdown hinzugefügt]
+- 04.03.2026: Business-Assistentin-App gebaut — jede Klientin bekommt eigene personalisierte App
+- Klientin bringt eigenen Anthropic API-Key mit
+- Blueprint-Prinzip: Wendy baut einmal, repliziert pro Klientin
+- App läuft lokal auf http://localhost:5000 (python app.py)

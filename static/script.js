@@ -15,11 +15,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // === NAVIGATION ===
 function initNavigation() {
+    // Nav items
     document.querySelectorAll(".nav-item").forEach(item => {
         item.addEventListener("click", () => {
             const section = item.dataset.section;
             const label = item.textContent.trim();
             switchSection(section, label);
+        });
+    });
+
+    // Collapsible sections
+    document.querySelectorAll(".nav-section-title").forEach(title => {
+        title.addEventListener("click", () => {
+            title.closest(".nav-section").classList.toggle("collapsed");
         });
     });
 }
