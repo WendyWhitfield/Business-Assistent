@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initHub();
     initMobileMenu();
     initImageUpload();
-    switchSection("home", "Hallo Wendy");
+    switchSection("home", "Let's do this! 🤍");
 });
 
 // === NAVIGATION ===
@@ -51,12 +51,17 @@ async function switchSection(section, label) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ section })
         });
+        if (!res.ok) {
+            const errText = await res.text();
+            throw new Error(`HTTP ${res.status}: ${errText.slice(0, 200)}`);
+        }
         const data = await res.json();
         typing.remove();
         appendMessage("assistant", data.message, false);
-    } catch {
+    } catch (err) {
+        console.error("section-start Fehler:", err);
         typing.remove();
-        appendMessage("assistant", `${label} — bereit.`, false);
+        appendMessage("assistant", `Verbindungsfehler beim Laden — bitte Seite neu laden. (${err.message})`, false);
     }
 }
 

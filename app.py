@@ -250,17 +250,18 @@ Begrüße sie kurz und persönlich. Maximal 3-4 Sätze.
 - Zeig dass du weißt wo sie steht — keine generische Begrüßung.
 - Warm und direkt, kein Blabla."""
 
-    response = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=300,
-        system=system_prompt,
-        messages=[{"role": "user", "content": start_prompt}]
-    )
-
-    welcome = response.content[0].text
-    save_message(section, "assistant", welcome)
-
-    return jsonify({"message": welcome})
+    try:
+        response = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=400,
+            system=system_prompt,
+            messages=[{"role": "user", "content": start_prompt}]
+        )
+        welcome = response.content[0].text
+        save_message(section, "assistant", welcome)
+        return jsonify({"message": welcome})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/api/chat", methods=["POST"])
