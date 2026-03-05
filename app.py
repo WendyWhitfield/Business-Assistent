@@ -212,7 +212,9 @@ def build_system(section):
     todos = get_open_todos()
     todos_text = "\n".join([f"- [{t['type']}] {t['text']}" for t in todos]) if todos else "Keine offenen To-Do's"
     section_instruction = SECTION_PROMPTS.get(section, "Du hilfst Wendy in diesem Bereich.")
-    return BASE_SYSTEM.format(hub=hub, todos=todos_text) + f"\n\nDEIN FOKUS IN DIESEM BEREICH:\n{section_instruction}"
+    # .replace() statt .format() — verhindert KeyError wenn hub.md geschweifte Klammern enthält
+    system = BASE_SYSTEM.replace("{hub}", hub).replace("{todos}", todos_text)
+    return system + f"\n\nDEIN FOKUS IN DIESEM BEREICH:\n{section_instruction}"
 
 
 @app.route("/")
