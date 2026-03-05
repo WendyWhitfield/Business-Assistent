@@ -9,6 +9,9 @@ from datetime import datetime
 load_dotenv()
 
 app = Flask(__name__)
+
+# Daten-Ordner anlegen (wichtig für Railway/Gunicorn)
+os.makedirs("data", exist_ok=True)
 client = Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 
 # --- Datenbank Setup ---
@@ -220,6 +223,8 @@ def complete(todo_id):
 def get_hub():
     return jsonify({"content": get_hub_content()})
 
+init_db()
+
 if __name__ == "__main__":
-    init_db()
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=True, host="0.0.0.0", port=port)

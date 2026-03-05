@@ -1,0 +1,22 @@
+{
+  "name": "Wendy Business Assistentin",
+  "short_name": "Wendy",
+  "description": "Wendys persönlicher Business-Assistent",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fca73d",
+  "theme_color": "#fca73d",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/static/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initInput();
     initVoice();
     initHub();
+    initMobileMenu();
     // Start on Business Strategie
     switchSection("business-strategie", "Business Strategie");
 });
@@ -206,4 +207,29 @@ async function loadHub() {
     } catch {
         hubContent.textContent = "Hub konnte nicht geladen werden.";
     }
+}
+
+// === MOBILE MENU ===
+function initMobileMenu() {
+    const hamburger = document.getElementById("hamburgerBtn");
+    const sidebar = document.querySelector(".sidebar");
+    const overlay = document.getElementById("mobileOverlay");
+
+    function openSidebar() {
+        sidebar.classList.add("mobile-open");
+        overlay.classList.add("active");
+    }
+
+    function closeSidebar() {
+        sidebar.classList.remove("mobile-open");
+        overlay.classList.remove("active");
+    }
+
+    hamburger.addEventListener("click", openSidebar);
+    overlay.addEventListener("click", closeSidebar);
+
+    // Sidebar schließen wenn ein Menüpunkt angeklickt wird
+    document.querySelectorAll(".nav-item").forEach(item => {
+        item.addEventListener("click", closeSidebar);
+    });
 }
