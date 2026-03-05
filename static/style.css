@@ -31,6 +31,7 @@ body {
     background: var(--orange);
     color: var(--brown);
     height: 100vh;
+    height: 100dvh;
     overflow: hidden;
 }
 
@@ -38,6 +39,7 @@ body {
 .app {
     display: flex;
     height: 100vh;
+    height: 100dvh;
 }
 
 /* === SIDEBAR === */
@@ -566,5 +568,14 @@ textarea#chatInput::placeholder { color: #ccc; }
 
     .hub-panel.open {
         position: fixed;
+    }
+
+    /* Safe area für iPhone (Notch + Home-Indikator) */
+    .chat-input-area {
+        padding-bottom: max(20px, env(safe-area-inset-bottom));
+    }
+
+    .sidebar {
+        padding-bottom: env(safe-area-inset-bottom);
     }
 }

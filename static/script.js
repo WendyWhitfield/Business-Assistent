@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initVoice();
     initHub();
     initMobileMenu();
-    switchSection("business-strategie", "Business Strategie");
+    switchSection("home", "Hallo Wendy");
 });
 
 // === NAVIGATION ===
