@@ -512,6 +512,17 @@ textarea#chatInput::placeholder { color: #ccc; }
 }
 
 
+
+/* === RECORDING TIMER === */
+.recording-timer {
+    font-size: 13px;
+    font-weight: 600;
+    color: #e74c3c;
+    min-width: 36px;
+    text-align: center;
+    animation: pulse 1s infinite;
+}
+
 /* === VOICE RECORDING HINT === */
 .recording-hint {
     text-align: center;
