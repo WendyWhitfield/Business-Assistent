@@ -511,6 +511,26 @@ textarea#chatInput::placeholder { color: #ccc; }
     display: block;
 }
 
+
+/* === VOICE RECORDING HINT === */
+.recording-hint {
+    text-align: center;
+    font-size: 12px;
+    color: var(--brown);
+    padding: 6px 0 2px;
+    animation: fadeIn 0.2s ease;
+}
+
+.recording-hint.locked {
+    color: #e74c3c;
+    font-weight: 500;
+}
+
+.mic-btn.locked {
+    color: #e74c3c;
+    animation: pulse 0.8s infinite;
+}
+
 /* === RESPONSIVE: Handy === */
 @media (max-width: 768px) {
     .hamburger-btn {

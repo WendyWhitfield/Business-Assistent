@@ -160,7 +160,7 @@ function escapeHtml(text) {
         .replace(/\n/g, "<br>");
 }
 
-// === VOICE ===
+// === VOICE (WhatsApp-Style) ===
 function initVoice() {
     const micBtn = document.getElementById("micBtn");
 
@@ -172,29 +172,100 @@ function initVoice() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     recognition = new SpeechRecognition();
     recognition.lang = "de-DE";
-    recognition.continuous = false;
+    recognition.continuous = true;
     recognition.interimResults = false;
 
+    let recordingMode = "idle"; // idle, holding, locked
+    let touchStartY = 0;
+    let lastTranscript = "";
+
     recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        const input = document.getElementById("chatInput");
-        input.value = (input.value + " " + transcript).trim();
-        input.style.height = "auto";
-        input.style.height = Math.min(input.scrollHeight, 120) + "px";
+        let transcript = "";
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            transcript += event.results[i][0].transcript;
+        }
+        lastTranscript += " " + transcript;
     };
 
     recognition.onend = () => {
-        isRecording = false;
-        micBtn.classList.remove("recording");
+        const mode = recordingMode;
+        recordingMode = "idle";
+        micBtn.classList.remove("recording", "locked");
+        hideRecordingHint();
+
+        const input = document.getElementById("chatInput");
+        const text = lastTranscript.trim();
+        lastTranscript = "";
+
+        if (text) {
+            input.value = (input.value + " " + text).trim();
+            input.style.height = "auto";
+            input.style.height = Math.min(input.scrollHeight, 120) + "px";
+            // Auto-senden wenn gehalten oder gesperrt
+            if (mode === "holding" || mode === "locked") {
+                setTimeout(sendMessage, 100);
+            }
+        }
     };
 
-    micBtn.addEventListener("click", () => {
-        if (isRecording) {
-            recognition.stop();
-        } else {
-            recognition.start();
-            isRecording = true;
-            micBtn.classList.add("recording");
+    function startRecording() {
+        lastTranscript = "";
+        try { recognition.start(); } catch(e) {}
+    }
+
+    function showRecordingHint(locked) {
+        let hint = document.getElementById("recordingHint");
+        if (!hint) {
+            hint = document.createElement("div");
+            hint.id = "recordingHint";
+            document.querySelector(".chat-input-area").prepend(hint);
+        }
+        hint.className = "recording-hint" + (locked ? " locked" : "");
+        hint.textContent = locked ? "Gesperrt — tippen zum Senden" : "Nach oben schieben zum Sperren";
+    }
+
+    function hideRecordingHint() {
+        const hint = document.getElementById("recordingHint");
+        if (hint) hint.remove();
+    }
+
+    // Mobile: gedrückt halten
+    micBtn.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        if (recordingMode === "locked") return;
+        touchStartY = e.touches[0].clientY;
+        recordingMode = "holding";
+        micBtn.classList.add("recording");
+        startRecording();
+        showRecordingHint(false);
+    }, { passive: false });
+
+    micBtn.addEventListener("touchmove", (e) => {
+        if (recordingMode !== "holding") return;
+        const dy = e.touches[0].clientY - touchStartY;
+        if (dy < -50) {
+            recordingMode = "locked";
+            micBtn.classList.add("locked");
+            showRecordingHint(true);
+        }
+    }, { passive: true });
+
+    micBtn.addEventListener("touchend", () => {
+        if (recordingMode === "holding") {
+            recognition.stop(); // loslassen → auto-senden
+        }
+        // locked → weiter aufnehmen, warten auf Klick
+    });
+
+    // Desktop: klicken zum Starten, nochmal klicken zum Senden
+    micBtn.addEventListener("click", (e) => {
+        if (recordingMode === "locked") {
+            recognition.stop(); // gesperrt → Klick = senden
+        } else if (recordingMode === "idle") {
+            recordingMode = "locked"; // Desktop: direkt sperren (kein Halten nötig)
+            micBtn.classList.add("recording", "locked");
+            startRecording();
+            showRecordingHint(true);
         }
     });
 }
