@@ -9,14 +9,19 @@ from datetime import datetime
 load_dotenv()
 
 app = Flask(__name__)
+
+# Absolute Pfade (wichtig für Railway/Gunicorn)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BASE_DIR, "data")
+DB_PATH = os.path.join(DATA_DIR, "assistant.db")
+HUB_PATH = os.path.join(DATA_DIR, "hub.md")
 client = Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 
-# Daten-Ordner anlegen (wichtig für Railway/Gunicorn)
-os.makedirs("data", exist_ok=True)
 
 # --- Datenbank Setup ---
 def init_db():
-    conn = sqlite3.connect("data/assistant.db")
+    os.makedirs(DATA_DIR, exist_ok=True)
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("""
         CREATE TABLE IF NOT EXISTS messages (
@@ -48,13 +53,13 @@ def init_db():
 
 def get_hub_content():
     try:
-        with open("data/hub.md", "r", encoding="utf-8") as f:
+        with open(HUB_PATH, "r", encoding="utf-8") as f:
             return f.read()
     except:
         return ""
 
 def get_chat_history(section, limit=20):
-    conn = sqlite3.connect("data/assistant.db")
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute(
         "SELECT role, content FROM messages WHERE section=? ORDER BY id DESC LIMIT ?",
@@ -65,7 +70,7 @@ def get_chat_history(section, limit=20):
     return [{"role": r[0], "content": r[1]} for r in reversed(rows)]
 
 def save_message(section, role, content):
-    conn = sqlite3.connect("data/assistant.db")
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute(
         "INSERT INTO messages (section, role, content, timestamp) VALUES (?, ?, ?, ?)",
@@ -75,7 +80,7 @@ def save_message(section, role, content):
     conn.close()
 
 def save_todo(todo_type, text):
-    conn = sqlite3.connect("data/assistant.db")
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute(
         "INSERT INTO todos (type, text, created) VALUES (?, ?, ?)",
@@ -85,7 +90,7 @@ def save_todo(todo_type, text):
     conn.close()
 
 def get_open_todos():
-    conn = sqlite3.connect("data/assistant.db")
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("SELECT id, type, text FROM todos WHERE done=0 ORDER BY created")
     rows = c.fetchall()
@@ -93,7 +98,7 @@ def get_open_todos():
     return [{"id": r[0], "type": r[1], "text": r[2]} for r in rows]
 
 def complete_todo(todo_id):
-    conn = sqlite3.connect("data/assistant.db")
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("UPDATE todos SET done=1 WHERE id=?", (todo_id,))
     conn.commit()
@@ -101,12 +106,12 @@ def complete_todo(todo_id):
 
 def update_hub(new_content):
     try:
-        with open("data/hub.md", "r", encoding="utf-8") as f:
+        with open(HUB_PATH, "r", encoding="utf-8") as f:
             current = f.read()
     except:
         current = ""
     updated = current + f"\n\n---\n[Update {datetime.now().strftime('%d.%m.%Y %H:%M')}]\n{new_content}"
-    with open("data/hub.md", "w", encoding="utf-8") as f:
+    with open(HUB_PATH, "w", encoding="utf-8") as f:
         f.write(updated)
 
 def auto_extract_and_save(section, user_message, assistant_message):
