@@ -10,13 +10,11 @@ document.addEventListener("DOMContentLoaded", () => {
     initVoice();
     initHub();
     initMobileMenu();
-    // Start on Business Strategie
     switchSection("business-strategie", "Business Strategie");
 });
 
 // === NAVIGATION ===
 function initNavigation() {
-    // Nav items
     document.querySelectorAll(".nav-item").forEach(item => {
         item.addEventListener("click", () => {
             const section = item.dataset.section;
@@ -25,7 +23,6 @@ function initNavigation() {
         });
     });
 
-    // Collapsible sections
     document.querySelectorAll(".nav-section-title").forEach(title => {
         title.addEventListener("click", () => {
             title.closest(".nav-section").classList.toggle("collapsed");
@@ -33,17 +30,32 @@ function initNavigation() {
     });
 }
 
-function switchSection(section, label) {
+async function switchSection(section, label) {
     currentSection = section;
     document.getElementById("sectionLabel").textContent = label;
 
-    // Active state
     document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
     document.querySelector(`[data-section="${section}"]`)?.classList.add("active");
 
-    // Clear chat & show welcome for new section
+    // Chat leeren und Typing-Indicator zeigen
     const messages = document.getElementById("chatMessages");
-    messages.innerHTML = `<div class="welcome-message"><p>${label} — bereit.</p></div>`;
+    messages.innerHTML = "";
+    const typing = appendTyping();
+
+    // Personalisierte Begrüßung vom Server holen
+    try {
+        const res = await fetch("/api/section-start", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ section })
+        });
+        const data = await res.json();
+        typing.remove();
+        appendMessage("assistant", data.message, false);
+    } catch {
+        typing.remove();
+        appendMessage("assistant", `${label} — bereit.`, false);
+    }
 }
 
 // === CHAT ===
@@ -51,13 +63,11 @@ function initInput() {
     const input = document.getElementById("chatInput");
     const sendBtn = document.getElementById("sendBtn");
 
-    // Auto-resize
     input.addEventListener("input", () => {
         input.style.height = "auto";
         input.style.height = Math.min(input.scrollHeight, 120) + "px";
     });
 
-    // Enter to send (Shift+Enter = newline)
     input.addEventListener("keydown", e => {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
@@ -88,18 +98,27 @@ async function sendMessage() {
         const data = await res.json();
         typing.remove();
         appendMessage("assistant", data.response);
+
+        // Kurze Animation wenn etwas automatisch gespeichert wurde
+        if (data.auto_saved) {
+            showSaveIndicator();
+        }
     } catch (err) {
         typing.remove();
         appendMessage("assistant", "Verbindungsfehler — bitte nochmal versuchen.");
     }
 }
 
-function appendMessage(role, content) {
-    const messages = document.getElementById("chatMessages");
+function showSaveIndicator() {
+    const indicator = document.createElement("div");
+    indicator.className = "save-indicator";
+    indicator.textContent = "✓ Im Hub gespeichert";
+    document.getElementById("chatMessages").appendChild(indicator);
+    setTimeout(() => indicator.remove(), 3000);
+}
 
-    // Remove welcome message
-    const welcome = messages.querySelector(".welcome-message");
-    if (welcome) welcome.remove();
+function appendMessage(role, content, showTime = true) {
+    const messages = document.getElementById("chatMessages");
 
     const div = document.createElement("div");
     div.className = `message ${role}`;
@@ -109,7 +128,7 @@ function appendMessage(role, content) {
 
     div.innerHTML = `
         <div class="message-bubble">${escapeHtml(content)}</div>
-        <div class="message-time">${time}</div>
+        ${showTime ? `<div class="message-time">${time}</div>` : ""}
     `;
 
     messages.appendChild(div);
@@ -228,7 +247,6 @@ function initMobileMenu() {
     hamburger.addEventListener("click", openSidebar);
     overlay.addEventListener("click", closeSidebar);
 
-    // Sidebar schließen wenn ein Menüpunkt angeklickt wird
     document.querySelectorAll(".nav-item").forEach(item => {
         item.addEventListener("click", closeSidebar);
     });

@@ -9,10 +9,10 @@ from datetime import datetime
 load_dotenv()
 
 app = Flask(__name__)
+client = Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 
 # Daten-Ordner anlegen (wichtig für Railway/Gunicorn)
 os.makedirs("data", exist_ok=True)
-client = Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 
 # --- Datenbank Setup ---
 def init_db():
@@ -100,12 +100,47 @@ def complete_todo(todo_id):
     conn.close()
 
 def update_hub(new_content):
-    with open("data/hub.md", "r", encoding="utf-8") as f:
-        current = f.read()
-    # Append update at the end of relevant section
+    try:
+        with open("data/hub.md", "r", encoding="utf-8") as f:
+            current = f.read()
+    except:
+        current = ""
     updated = current + f"\n\n---\n[Update {datetime.now().strftime('%d.%m.%Y %H:%M')}]\n{new_content}"
     with open("data/hub.md", "w", encoding="utf-8") as f:
         f.write(updated)
+
+def auto_extract_and_save(section, user_message, assistant_message):
+    """Extrahiert wichtige Infos und speichert automatisch im Hub."""
+    extract_prompt = f"""Analysiere dieses kurze Gespräch aus dem Bereich "{section}".
+
+Nutzerin: {user_message}
+Assistent: {assistant_message}
+
+Gibt es WICHTIGE neue Informationen die dauerhaft gespeichert werden sollen?
+Speichere NUR: Entscheidungen, neue Brand-Erkenntnisse, konkrete Pläne, wichtige Infos über die Person/Business.
+NICHT speichern: Small Talk, Fragen ohne Antwort, allgemeine Überlegungen.
+
+Antworte NUR mit validen JSON (kein Markdown, kein Text darum):
+{{"save": true/false, "content": "Kurze Zusammenfassung was gespeichert wird (leer wenn save=false)", "todos": ["To-Do Text falls erwähnt"]}}"""
+
+    try:
+        response = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=300,
+            messages=[{"role": "user", "content": extract_prompt}]
+        )
+        result = json.loads(response.content[0].text)
+        saved = False
+        if result.get("save") and result.get("content"):
+            update_hub(f"[{section}] {result['content']}")
+            saved = True
+        for todo in result.get("todos", []):
+            if todo.strip():
+                save_todo("auto", todo)
+        return saved
+    except:
+        return False
+
 
 # --- System Prompts je Bereich ---
 SECTION_PROMPTS = {
@@ -147,9 +182,8 @@ BASE_SYSTEM = """Du bist Wendys persönlicher Business-Assistent. Du kennst sie 
 WICHTIG:
 - Du antwortest IMMER in Wendys Brand Voice: direkt, warm, authentisch, kein Marketing-Blabla
 - Du bist kein generisches KI-Tool — du bist IHR Assistent
-- Wenn Wendy sagt "speichere das" → antworte mit einer kurzen Bestätigung was du gespeichert hast
-- Wenn es Brainstorming ist → lass es fließen, speichere NICHT automatisch
-- Beim Check-Out → extrahiere automatisch wichtige To-Do's
+- Du erinnerst dich an alles was im Hub steht — das ist dein Gedächtnis
+- Wichtige Erkenntnisse und Entscheidungen werden automatisch gespeichert
 
 HUB — was du über Wendy weißt:
 {hub}
@@ -158,9 +192,56 @@ OFFENE TO-DO'S:
 {todos}
 """
 
+def build_system(section):
+    hub = get_hub_content()
+    todos = get_open_todos()
+    todos_text = "\n".join([f"- [{t['type']}] {t['text']}" for t in todos]) if todos else "Keine offenen To-Do's"
+    section_instruction = SECTION_PROMPTS.get(section, "Du hilfst Wendy in diesem Bereich.")
+    return BASE_SYSTEM.format(hub=hub, todos=todos_text) + f"\n\nDEIN FOKUS IN DIESEM BEREICH:\n{section_instruction}"
+
+
 @app.route("/")
 def index():
     return render_template("index.html")
+
+
+@app.route("/api/section-start", methods=["POST"])
+def section_start():
+    """Generiert eine personalisierte Begrüßung beim Öffnen eines Bereichs."""
+    data = request.json
+    section = data.get("section", "business-strategie")
+
+    now = datetime.now()
+    stunde = now.hour
+    if stunde < 12:
+        tageszeit = "Guten Morgen"
+    elif stunde < 17:
+        tageszeit = "Hallo"
+    else:
+        tageszeit = "Guten Abend"
+
+    system_prompt = build_system(section)
+
+    start_prompt = f"""{tageszeit} Wendy — sie öffnet gerade den Bereich.
+
+Begrüße sie kurz und persönlich. Maximal 3-4 Sätze.
+- Was ist in diesem Bereich gerade offen oder wichtig?
+- Was wäre ein sinnvoller nächster Schritt?
+- Zeig dass du weißt wo sie steht — keine generische Begrüßung.
+- Warm und direkt, kein Blabla."""
+
+    response = client.messages.create(
+        model="claude-sonnet-4-6",
+        max_tokens=300,
+        system=system_prompt,
+        messages=[{"role": "user", "content": start_prompt}]
+    )
+
+    welcome = response.content[0].text
+    save_message(section, "assistant", welcome)
+
+    return jsonify({"message": welcome})
+
 
 @app.route("/api/chat", methods=["POST"])
 def chat():
@@ -171,14 +252,7 @@ def chat():
     if not user_message:
         return jsonify({"error": "Keine Nachricht"}), 400
 
-    hub = get_hub_content()
-    todos = get_open_todos()
-    todos_text = "\n".join([f"- [{t['type']}] {t['text']}" for t in todos]) if todos else "Keine offenen To-Do's"
-
-    section_instruction = SECTION_PROMPTS.get(section, "Du hilfst Wendy in diesem Bereich.")
-
-    system_prompt = BASE_SYSTEM.format(hub=hub, todos=todos_text) + f"\n\nDEIN FOKUS IN DIESEM BEREICH:\n{section_instruction}"
-
+    system_prompt = build_system(section)
     history = get_chat_history(section)
     messages = history + [{"role": "user", "content": user_message}]
 
@@ -191,18 +265,14 @@ def chat():
 
     assistant_message = response.content[0].text
 
-    # Auto-detect: save to hub wenn explizit
-    if "speichere das" in user_message.lower() or "speicher das" in user_message.lower():
-        update_hub(f"[{section}] {user_message.replace('speichere das', '').replace('speicher das', '').strip()}")
-
-    # Auto-detect: To-Do's beim Check-Out
-    if section == "check-out" and ("todo" in assistant_message.lower() or "morgen" in assistant_message.lower()):
-        pass  # Handled via explicit todo endpoint
-
     save_message(section, "user", user_message)
     save_message(section, "assistant", assistant_message)
 
-    return jsonify({"response": assistant_message})
+    # Automatisch wichtige Infos extrahieren und im Hub speichern
+    saved = auto_extract_and_save(section, user_message, assistant_message)
+
+    return jsonify({"response": assistant_message, "auto_saved": saved})
+
 
 @app.route("/api/todos", methods=["GET"])
 def get_todos():
@@ -222,6 +292,15 @@ def complete(todo_id):
 @app.route("/api/hub", methods=["GET"])
 def get_hub():
     return jsonify({"content": get_hub_content()})
+
+@app.route("/api/hub/update", methods=["POST"])
+def hub_update():
+    data = request.json
+    content = data.get("content", "")
+    if content:
+        update_hub(content)
+    return jsonify({"status": "ok"})
+
 
 init_db()
 
