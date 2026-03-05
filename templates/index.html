@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Wendy — Business Assistentin</title>
+    <title>Wendy & Qwendolin</title>
     <link rel="stylesheet" href="/static/style.css">
     <link rel="manifest" href="/static/manifest.json">
     <meta name="theme-color" content="#fca73d">
@@ -19,7 +19,7 @@
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="brand-name">Wendy Whitfield</div>
-                <div class="brand-sub">Business Assistentin</div>
+                <div class="brand-sub">Business-Assistentin Qwendolin</div>
             </div>
 
             <nav class="sidebar-nav">
@@ -126,6 +126,14 @@
                         placeholder="Schreib oder sprich..."
                         rows="1"
                     ></textarea>
+                    <input type="file" id="imageInput" accept="image/*" style="display:none">
+                    <button class="image-btn" id="imageBtn" title="Bild hochladen">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <polyline points="21 15 16 10 5 21"/>
+                        </svg>
+                    </button>
                     <button class="mic-btn" id="micBtn" title="Sprechen">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>

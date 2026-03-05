@@ -2,6 +2,7 @@
 let currentSection = "business-strategie";
 let isRecording = false;
 let recognition = null;
+let pendingImage = null; // { base64, type, name }
 
 // === INIT ===
 document.addEventListener("DOMContentLoaded", () => {
@@ -10,6 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initVoice();
     initHub();
     initMobileMenu();
+    initImageUpload();
     switchSection("home", "Hallo Wendy");
 });
 
@@ -81,22 +83,37 @@ function initInput() {
 async function sendMessage() {
     const input = document.getElementById("chatInput");
     const text = input.value.trim();
-    if (!text) return;
+    if (!text && !pendingImage) return;
 
     input.value = "";
     input.style.height = "auto";
 
-    appendMessage("user", text);
+    // Nachricht anzeigen
+    if (pendingImage) {
+        appendImageMessage("user", pendingImage.previewUrl, text);
+    } else {
+        appendMessage("user", text);
+    }
+
+    const imageToSend = pendingImage ? { base64: pendingImage.base64, type: pendingImage.type } : null;
+    clearImagePreview();
+
     const typing = appendTyping();
 
     try {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 60000); // 60s Timeout
+        const timeout = setTimeout(() => controller.abort(), 60000);
+
+        const body = { section: currentSection, message: text };
+        if (imageToSend) {
+            body.image = imageToSend.base64;
+            body.image_type = imageToSend.type;
+        }
 
         const res = await fetch("/api/chat", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ section: currentSection, message: text }),
+            body: JSON.stringify(body),
             signal: controller.signal
         });
         clearTimeout(timeout);
@@ -162,12 +179,60 @@ function appendTyping() {
     return div;
 }
 
+function appendImageMessage(role, previewUrl, caption) {
+    const messages = document.getElementById("chatMessages");
+    const div = document.createElement("div");
+    div.className = `message ${role}`;
+    const now = new Date();
+    const time = now.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+    div.innerHTML = `
+        <div class="message-bubble">
+            <img src="${previewUrl}" style="max-width:200px;max-height:200px;border-radius:8px;display:block;margin-bottom:${caption ? "6px" : "0"}">
+            ${caption ? `<span>${escapeHtml(caption)}</span>` : ""}
+        </div>
+        <div class="message-time">${time}</div>
+    `;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+}
+
 function escapeHtml(text) {
     return text
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
         .replace(/\n/g, "<br>");
+}
+
+// Einfaches Markdown → HTML (für Hub-Panel)
+function renderMarkdown(md) {
+    return md
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+        // Headings
+        .replace(/^#### (.+)$/gm, "<h4>$1</h4>")
+        .replace(/^### (.+)$/gm, "<h3>$1</h3>")
+        .replace(/^## (.+)$/gm, "<h2>$1</h2>")
+        .replace(/^# (.+)$/gm, "<h2>$1</h2>")
+        // Bold
+        .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+        // Horizontal rule
+        .replace(/^---$/gm, "<hr>")
+        // Table rows (simple: | a | b | → row)
+        .replace(/^\|(.+)\|$/gm, (_, cells) => {
+            const tds = cells.split("|").map(c => `<td>${c.trim()}</td>`).join("");
+            return `<tr>${tds}</tr>`;
+        })
+        // Table separator rows (|---|---|) → skip
+        .replace(/<tr>(<td>-+<\/td>)+<\/tr>/g, "")
+        // Wrap consecutive <tr> in <table>
+        .replace(/((<tr>.+<\/tr>\n?)+)/g, "<table>$1</table>")
+        // List items
+        .replace(/^- (.+)$/gm, "<li>$1</li>")
+        .replace(/(<li>.+<\/li>\n?)+/g, "<ul>$&</ul>")
+        // Line breaks (non-tag lines)
+        .replace(/\n(?!<)/g, "<br>\n")
+        // Clean up extra breaks after block elements
+        .replace(/(<\/h[2-4]>|<\/hr>|<\/table>|<\/ul>)<br>/g, "$1");
 }
 
 // === VOICE (WhatsApp-Style) ===
@@ -362,10 +427,57 @@ async function loadHub() {
     try {
         const res = await fetch("/api/hub");
         const data = await res.json();
-        hubContent.textContent = data.content;
+        hubContent.innerHTML = renderMarkdown(data.content);
     } catch {
         hubContent.textContent = "Hub konnte nicht geladen werden.";
     }
+}
+
+// === IMAGE UPLOAD ===
+function initImageUpload() {
+    const imageBtn = document.getElementById("imageBtn");
+    const imageInput = document.getElementById("imageInput");
+    if (!imageBtn || !imageInput) return;
+
+    imageBtn.addEventListener("click", () => imageInput.click());
+
+    imageInput.addEventListener("change", () => {
+        const file = imageInput.files[0];
+        if (!file) return;
+        imageInput.value = "";
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const dataUrl = e.target.result;
+            // dataUrl = "data:image/jpeg;base64,XXXXX"
+            const [meta, base64] = dataUrl.split(",");
+            const type = meta.match(/:(.*?);/)[1];
+            pendingImage = { base64, type, previewUrl: dataUrl, name: file.name };
+            showImagePreview(dataUrl);
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+function showImagePreview(url) {
+    // Altes Preview entfernen
+    clearImagePreview();
+    const area = document.querySelector(".chat-input-area");
+    const preview = document.createElement("div");
+    preview.className = "image-preview";
+    preview.id = "imagePreview";
+    preview.innerHTML = `
+        <img src="${url}" alt="Vorschau">
+        <button class="image-preview-remove" id="imagePreviewRemove" title="Entfernen">✕</button>
+    `;
+    area.insertBefore(preview, area.firstChild);
+    document.getElementById("imagePreviewRemove").addEventListener("click", clearImagePreview);
+}
+
+function clearImagePreview() {
+    pendingImage = null;
+    const el = document.getElementById("imagePreview");
+    if (el) el.remove();
 }
 
 // === MOBILE MENU ===

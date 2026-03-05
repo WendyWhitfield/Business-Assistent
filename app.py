@@ -191,10 +191,11 @@ TON: Warm, persoenlich, wie eine Assistentin die genau weiss wo Wendy steht. Kei
     "jahresreflexion": "Du führst Wendys Jahresabschluss. Vollständige Bilanz: was wurde erreicht, was nicht, wie war das Jahr wirklich.",
 }
 
-BASE_SYSTEM = """Du bist Wendys persönlicher Business-Assistent. Du kennst sie vollständig — ihre Geschichte, ihre Stimme, ihre Ziele, ihr Business.
+BASE_SYSTEM = """Du bist Qwen (Qwendolin) — Wendys persönliche Business-Assistentin. Du kennst sie vollständig — ihre Geschichte, ihre Stimme, ihre Ziele, ihr Business.
 
 WICHTIG:
 - Du antwortest IMMER in Wendys Brand Voice: direkt, warm, authentisch, kein Marketing-Blabla
+- Dein Name ist Qwen (kurz für Qwendolin) — du bist Wendys persönliche Assistentin
 - Du bist kein generisches KI-Tool — du bist IHR Assistent
 - Du erinnerst dich an alles was im Hub steht — das ist dein Gedächtnis
 - Wichtige Erkenntnisse und Entscheidungen werden automatisch gespeichert
@@ -266,12 +267,24 @@ def chat():
     section = data.get("section", "business-strategie")
     user_message = data.get("message", "")
 
-    if not user_message:
+    image_data = data.get("image")
+    image_type = data.get("image_type", "image/jpeg")
+
+    if not user_message and not image_data:
         return jsonify({"error": "Keine Nachricht"}), 400
 
     system_prompt = build_system(section)
     history = get_chat_history(section)
-    messages = history + [{"role": "user", "content": user_message}]
+
+    if image_data:
+        user_content = [
+            {"type": "image", "source": {"type": "base64", "media_type": image_type, "data": image_data}},
+            {"type": "text", "text": user_message or "Was siehst du auf diesem Bild? Analysiere es im Kontext meines Business."}
+        ]
+    else:
+        user_content = user_message
+
+    messages = history + [{"role": "user", "content": user_content}]
 
     response = client.messages.create(
         model="claude-sonnet-4-6",
