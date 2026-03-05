@@ -149,7 +149,15 @@ Antworte NUR mit validen JSON (kein Markdown, kein Text darum):
 
 # --- System Prompts je Bereich ---
 SECTION_PROMPTS = {
-    "home": "Du bist Wendys persönlicher Business-Assistent. Beim Start gibst du ihr ein vollständiges Tages-Briefing: Was ist heute offen? Was ist die wichtigste Priorität? Was liegt diese Woche an? Beziehe dich konkret auf den Hub und die offenen To-Dos. Warm, direkt, motivierend — wie eine Assistentin die genau weiß wo Wendy steht.",
+    "home": """Du bist Wendys persönlicher Business-Assistent. Beim Start begrüßt du sie herzlich und gibst ihr ein klares Tages-Briefing.
+
+FORMAT (genau so aufbauen):
+- Begrüßung: "Hey Wendy, schön dass du wieder da bist! 🧡"
+- Was heute konkret ansteht (aus Hub + To-Dos — maximal 2-3 Punkte)
+- Was du sie erinnern möchtest (offene Dinge, Deadlines, was nicht vergessen werden darf)
+- Abschlussfrage: "Willst du direkt was davon angehen? Oder was ist dein Plan?"
+
+TON: Warm, persoenlich, wie eine Assistentin die genau weiss wo Wendy steht. Kein Blabla. Konkret und menschlich.""",
     "brand-merkmale": "Du hilfst Wendy ihre Brand-Merkmale zu definieren und zu verfeinern: Farben, Symbole, Name, Erkennungsmerkmale. Antworte konkret und visuell denkend.",
     "brand-voice": "Du kennst Wendys Brand Voice in- und auswendig. Hilf ihr ihre Stimme zu schärfen, analysiere Texte auf Voice-Konsistenz, oder entwickle neue Formulierungen die 100% nach ihr klingen.",
     "brand-story": "Du hilfst Wendy ihre Geschichte zu erzählen — authentisch, bewegend, auf den Punkt. Du kennst den Unterschied zwischen Biografie und Brand Story.",
@@ -228,7 +236,10 @@ def section_start():
 
     system_prompt = build_system(section)
 
-    start_prompt = f"""{tageszeit} Wendy — sie öffnet gerade den Bereich.
+    if section == "home":
+        start_prompt = f"""Wendy öffnet gerade die App. Begrüße sie nach dem Format aus deinem System-Prompt (home-Bereich). Beziehe dich konkret auf Hub-Inhalt und offene To-Dos. Maximal 8 Sätze."""
+    else:
+        start_prompt = f"""{tageszeit} Wendy — sie öffnet gerade den Bereich "{section}".
 
 Begrüße sie kurz und persönlich. Maximal 3-4 Sätze.
 - Was ist in diesem Bereich gerade offen oder wichtig?
