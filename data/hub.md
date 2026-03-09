@@ -136,16 +136,16 @@ EmbodyBRAND vorstellen NUR wenn Frau qualifiziert wirkt.
 - LinkedIn-Akquise: 15/Tag, laeuft seit 02.03.2026
 - Webseit: vor Webinar live
 
-**Aktueller Stand (05.03.2026):**
-- Vertrieb: Akquise laeuft, Pipeline noch leer, 2 Testkunden, Infocall 11.03.
-- Marketing: Karussell 2 Slides 4-7 offen, Webseite fehlt noch
-- Angebot: EmbodyBRAND definiert, Webinar fertig vorbereitet
+**Aktueller Stand (09.03.2026):**
+- Vertrieb: Akquise laeuft (seit 02.03., Tag 7), 2 Testkunden bestaetigt, Infocall 11.03. (uebermorgen!)
+- Marketing: Karussell 2 FERTIG ✅ | Karussell 3 als naechstes | Landingpage gestartet 🔄
+- Angebot: EmbodyBRAND definiert ✅ | Webinar fertig vorbereitet ✅
 - Wachstum: EmbodyBRAND Selbstdurchlauf noch nicht gestartet
 
 **Offene Prioritaeten:**
-1. LinkedIn-Reaktionen aus Tag 1-3 in Pipeline eintragen
-2. Karussell 2 fertigstellen
-3. Webseite bauen (vor Mitte Maerz)
+1. Infocall 11.03. vorbereiten (Testkunden-Erstgespraech)
+2. Karussell 3 erstellen (Kundenperspektive)
+3. Landingpage/Webseite fertigstellen (vor Webinar Mitte Maerz)
 4. Setting Call Fragen finalisieren
 
 ---
