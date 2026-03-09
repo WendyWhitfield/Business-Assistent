@@ -158,3 +158,5 @@ EmbodyBRAND vorstellen NUR wenn Frau qualifiziert wirkt.
 - Klientinnen-Prozess analog: Calls + WhatsApp + Workbook. KI baut Wendy fuer sie.
 - Business-Assistent App gebaut und auf Railway deployed (05.03.2026)
 - App ersetzt CEO Workspace fuer den taeglichen Business-Alltag
+- Assistentin umbenannt: Qwendolin → Gwendoline / Gwen (09.03.2026)
+- Lokal laeuft alles. Railway API-Key-Problem noch offen (morgen fixen)
