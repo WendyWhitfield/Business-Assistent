@@ -330,6 +330,21 @@ def complete(todo_id):
     complete_todo(todo_id)
     return jsonify({"status": "ok"})
 
+@app.route("/api/history/<section>", methods=["GET"])
+def get_history(section):
+    """Gibt die letzten 30 gespeicherten Nachrichten einer Section zurück."""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute(
+        "SELECT role, content, timestamp FROM messages WHERE section=? ORDER BY id DESC LIMIT 30",
+        (section,)
+    )
+    rows = c.fetchall()
+    conn.close()
+    messages = [{"role": r[0], "content": r[1], "timestamp": r[2]} for r in reversed(rows)]
+    return jsonify({"messages": messages})
+
+
 @app.route("/api/hub", methods=["GET"])
 def get_hub():
     return jsonify({"content": get_hub_content()})

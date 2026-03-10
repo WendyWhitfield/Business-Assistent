@@ -39,12 +39,33 @@ async function switchSection(section, label) {
     document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
     document.querySelector(`[data-section="${section}"]`)?.classList.add("active");
 
-    // Chat leeren und Typing-Indicator zeigen
     const messages = document.getElementById("chatMessages");
     messages.innerHTML = "";
+
+    // Alte Nachrichten laden
+    try {
+        const histRes = await fetch(`/api/history/${section}`);
+        if (histRes.ok) {
+            const histData = await histRes.json();
+            if (histData.messages && histData.messages.length > 0) {
+                const sep = document.createElement("div");
+                sep.className = "history-separator";
+                sep.textContent = "— frühere Nachrichten —";
+                messages.appendChild(sep);
+                histData.messages.forEach(m => {
+                    appendMessage(m.role, m.content, false);
+                });
+                const sep2 = document.createElement("div");
+                sep2.className = "history-separator";
+                sep2.textContent = "— jetzt —";
+                messages.appendChild(sep2);
+            }
+        }
+    } catch(e) {}
+
     const typing = appendTyping();
 
-    // Personalisierte Begrüßung vom Server holen
+    // Neue Begrüßung holen
     try {
         const res = await fetch("/api/section-start", {
             method: "POST",

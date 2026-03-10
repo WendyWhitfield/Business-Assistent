@@ -525,6 +525,15 @@ textarea#chatInput::placeholder { color: #ccc; }
 .hub-content td, .hub-content th { padding: 4px 8px; border: 1px solid rgba(255,255,255,0.15); }
 .hub-content th { background: rgba(255,255,255,0.1); }
 
+/* === HISTORY SEPARATOR === */
+.history-separator {
+    text-align: center;
+    font-size: 11px;
+    color: rgba(155, 101, 32, 0.5);
+    padding: 8px 0;
+    letter-spacing: 0.5px;
+}
+
 /* === AUTO-SAVE INDICATOR === */
 .save-indicator {
     align-self: center;
