@@ -274,16 +274,14 @@ function initVoice() {
     recognition = new SpeechRecognition();
     recognition.lang = "de-DE";
     recognition.continuous = true;
-    recognition.interimResults = true;
+    recognition.interimResults = false;
 
     let recordingMode = "idle"; // idle, holding, locked
     let touchStartY = 0;
     let fullTranscript = "";
-    let interimTranscript = "";
     let intentionalStop = false;
     let timerInterval = null;
     let timerSeconds = 0;
-    let lastFinalIndex = 0;
 
     // --- Timer ---
     function startTimer() {
@@ -337,9 +335,6 @@ function initVoice() {
         for (let i = event.resultIndex; i < event.results.length; i++) {
             if (event.results[i].isFinal) {
                 fullTranscript += " " + event.results[i][0].transcript;
-                interimTranscript = "";
-            } else {
-                interimTranscript = event.results[i][0].transcript;
             }
         }
     };
@@ -347,11 +342,6 @@ function initVoice() {
     recognition.onend = () => {
         // Auto-restart wenn wir noch aufnehmen
         if (!intentionalStop && (recordingMode === "holding" || recordingMode === "locked")) {
-            // Interim-Text sichern falls vorhanden
-            if (interimTranscript.trim()) {
-                fullTranscript += " " + interimTranscript.trim();
-                interimTranscript = "";
-            }
             setTimeout(() => {
                 try { recognition.start(); } catch(e) {}
             }, 150);
@@ -365,10 +355,8 @@ function initVoice() {
         hideHint();
         stopTimer();
 
-        // Interim-Text auch mitsenden falls vorhanden
-        const text = (fullTranscript + " " + interimTranscript).trim();
+        const text = fullTranscript.trim();
         fullTranscript = "";
-        interimTranscript = "";
 
         if (text) {
             const input = document.getElementById("chatInput");
@@ -389,17 +377,31 @@ function initVoice() {
         hideHint();
         stopTimer();
         fullTranscript = "";
-        interimTranscript = "";
     };
 
     function stopRecording() {
         intentionalStop = true;
-        recognition.stop();
+        try { recognition.stop(); } catch(e) {
+            // Recognition war gerade nicht aktiv — onend manuell triggern
+            intentionalStop = false;
+            recordingMode = "idle";
+            micBtn.classList.remove("recording", "locked");
+            hideHint();
+            stopTimer();
+            const text = fullTranscript.trim();
+            fullTranscript = "";
+            if (text) {
+                const input = document.getElementById("chatInput");
+                input.value = (input.value + " " + text).trim();
+                input.style.height = "auto";
+                input.style.height = Math.min(input.scrollHeight, 120) + "px";
+                setTimeout(sendMessage, 150);
+            }
+        }
     }
 
     function startRecording() {
         fullTranscript = "";
-        interimTranscript = "";
         intentionalStop = false;
         try { recognition.start(); } catch(e) {}
         startTimer();
@@ -426,11 +428,21 @@ function initVoice() {
         }
     }, { passive: true });
 
-    micBtn.addEventListener("touchend", () => {
+    let touchMoved = false;
+    micBtn.addEventListener("touchstart", (e) => {
+        touchMoved = false;
+    }, { passive: true, capture: true });
+
+    micBtn.addEventListener("touchmove", (e) => {
+        touchMoved = true;
+    }, { passive: true, capture: true });
+
+    micBtn.addEventListener("touchend", (e) => {
         if (recordingMode === "holding") {
             stopRecording(); // Loslassen = senden
+        } else if (recordingMode === "locked" && !touchMoved) {
+            stopRecording(); // Kurzer Tap im gesperrten Modus = senden
         }
-        // locked = weiter aufnehmen
     });
 
     // --- Desktop: Klick zum Starten/Senden ---
