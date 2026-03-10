@@ -253,14 +253,16 @@ function initVoice() {
     recognition = new SpeechRecognition();
     recognition.lang = "de-DE";
     recognition.continuous = true;
-    recognition.interimResults = false;
+    recognition.interimResults = true;
 
     let recordingMode = "idle"; // idle, holding, locked
     let touchStartY = 0;
     let fullTranscript = "";
+    let interimTranscript = "";
     let intentionalStop = false;
     let timerInterval = null;
     let timerSeconds = 0;
+    let lastFinalIndex = 0;
 
     // --- Timer ---
     function startTimer() {
@@ -314,13 +316,21 @@ function initVoice() {
         for (let i = event.resultIndex; i < event.results.length; i++) {
             if (event.results[i].isFinal) {
                 fullTranscript += " " + event.results[i][0].transcript;
+                interimTranscript = "";
+            } else {
+                interimTranscript = event.results[i][0].transcript;
             }
         }
     };
 
     recognition.onend = () => {
-        // Auto-restart wenn wir noch aufnehmen (Pause erkannt aber User will weitersprechen)
+        // Auto-restart wenn wir noch aufnehmen
         if (!intentionalStop && (recordingMode === "holding" || recordingMode === "locked")) {
+            // Interim-Text sichern falls vorhanden
+            if (interimTranscript.trim()) {
+                fullTranscript += " " + interimTranscript.trim();
+                interimTranscript = "";
+            }
             setTimeout(() => {
                 try { recognition.start(); } catch(e) {}
             }, 150);
@@ -329,33 +339,36 @@ function initVoice() {
 
         // Intentional stop — verarbeiten
         intentionalStop = false;
-        const mode = recordingMode;
         recordingMode = "idle";
         micBtn.classList.remove("recording", "locked");
         hideHint();
         stopTimer();
 
-        const text = fullTranscript.trim();
+        // Interim-Text auch mitsenden falls vorhanden
+        const text = (fullTranscript + " " + interimTranscript).trim();
         fullTranscript = "";
+        interimTranscript = "";
 
         if (text) {
             const input = document.getElementById("chatInput");
             input.value = (input.value + " " + text).trim();
             input.style.height = "auto";
             input.style.height = Math.min(input.scrollHeight, 120) + "px";
-            // Auto-senden
             setTimeout(sendMessage, 150);
         }
     };
 
     recognition.onerror = (e) => {
-        if (e.error === "no-speech" || e.error === "aborted") return;
-        intentionalStop = false;
+        // Für diese Fehler einfach weiter aufnehmen (onend übernimmt den Neustart)
+        if (e.error === "no-speech" || e.error === "aborted" || e.error === "network") return;
+        // Echter Fehler — alles zurücksetzen
+        intentionalStop = true;
         recordingMode = "idle";
         micBtn.classList.remove("recording", "locked");
         hideHint();
         stopTimer();
         fullTranscript = "";
+        interimTranscript = "";
     };
 
     function stopRecording() {
@@ -365,6 +378,7 @@ function initVoice() {
 
     function startRecording() {
         fullTranscript = "";
+        interimTranscript = "";
         intentionalStop = false;
         try { recognition.start(); } catch(e) {}
         startTimer();
