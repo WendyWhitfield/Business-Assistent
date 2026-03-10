@@ -232,31 +232,42 @@ def index():
 
 @app.route("/api/section-start", methods=["POST"])
 def section_start():
-    """Generiert eine personalisierte Begrüßung beim Öffnen eines Bereichs."""
+    """Generiert eine kontextbewusste Begrüßung — frisch oder als Fortsetzung."""
     data = request.json
     section = data.get("section", "business-strategie")
 
-    now = datetime.now()
-    stunde = now.hour
-    if stunde < 12:
-        tageszeit = "Guten Morgen"
-    elif stunde < 17:
-        tageszeit = "Hallo"
-    else:
-        tageszeit = "Guten Abend"
-
     system_prompt = build_system(section)
+    history = get_chat_history(section, limit=10)
 
-    if section == "home":
-        start_prompt = f"""Wendy öffnet gerade die App. Begrüße sie nach dem Format aus deinem System-Prompt (home-Bereich). Beziehe dich konkret auf Hub-Inhalt und offene To-Dos. Maximal 8 Sätze."""
+    if history:
+        # Letzte Nachrichten als Kontext zusammenfassen
+        last_msgs = history[-6:]
+        history_text = "\n".join([
+            f"{'WENDY' if m['role'] == 'user' else 'GWEN'}: {m['content'][:300]}"
+            for m in last_msgs
+        ])
+        start_prompt = f"""Wendy kommt zurück in diesen Bereich. Ihr habt hier schon gesprochen.
+
+Letzter Gesprächsverlauf:
+{history_text}
+
+Knüpfe natürlich daran an — keine neue Begrüßung, kein Wochentag nochmal, kein "Guten Morgen" wieder.
+Zeig kurz dass du dich erinnerst und frag womit sie weitermachen will. Max. 2-3 Sätze."""
     else:
-        start_prompt = f"""{tageszeit} Wendy — sie öffnet gerade den Bereich "{section}".
+        now = datetime.now()
+        stunde = now.hour
+        if stunde < 12:
+            tageszeit = "Guten Morgen"
+        elif stunde < 17:
+            tageszeit = "Hallo"
+        else:
+            tageszeit = "Guten Abend"
 
-Begrüße sie kurz und persönlich. Maximal 3-4 Sätze.
-- Was ist in diesem Bereich gerade offen oder wichtig?
-- Was wäre ein sinnvoller nächster Schritt?
-- Zeig dass du weißt wo sie steht — keine generische Begrüßung.
-- Warm und direkt, kein Blabla."""
+        if section == "home":
+            start_prompt = """Wendy öffnet gerade die App zum ersten Mal. Begrüße sie herzlich. Beziehe dich konkret auf Hub-Inhalt und offene To-Dos. Maximal 8 Sätze."""
+        else:
+            start_prompt = f"""{tageszeit} Wendy — sie öffnet den Bereich "{section}" zum ersten Mal.
+Begrüße sie kurz. Was ist hier gerade wichtig? Maximal 3-4 Sätze. Warm und direkt."""
 
     try:
         response = client.messages.create(
