@@ -264,42 +264,33 @@ function renderMarkdown(md) {
 // === VOICE (WhatsApp-Style) ===
 function initVoice() {
     const micBtn = document.getElementById("micBtn");
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-    if (!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)) {
+    if (!SpeechRecognition) {
         micBtn.style.display = "none";
         return;
     }
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    recognition = new SpeechRecognition();
-    recognition.lang = "de-DE";
-    recognition.continuous = true;
-    recognition.interimResults = false;
-
     let recordingMode = "idle"; // idle, holding, locked
     let touchStartY = 0;
+    let touchMoved = false;
     let fullTranscript = "";
-    let intentionalStop = false;
     let timerInterval = null;
     let timerSeconds = 0;
+    let activeRec = null; // aktuelle Recognition-Instanz
 
     // --- Timer ---
     function startTimer() {
         timerSeconds = 0;
         updateTimer();
-        timerInterval = setInterval(() => {
-            timerSeconds++;
-            updateTimer();
-        }, 1000);
+        timerInterval = setInterval(() => { timerSeconds++; updateTimer(); }, 1000);
     }
-
     function stopTimer() {
         clearInterval(timerInterval);
         timerInterval = null;
         const el = document.getElementById("recordingTimer");
         if (el) el.remove();
     }
-
     function updateTimer() {
         let el = document.getElementById("recordingTimer");
         if (!el) {
@@ -322,72 +313,57 @@ function initVoice() {
             document.querySelector(".chat-input-area").prepend(hint);
         }
         hint.className = "recording-hint" + (locked ? " locked" : "");
-        hint.textContent = locked ? "Gesperrt — tippen zum Senden" : "Nach oben schieben zum Sperren";
+        hint.textContent = locked ? "Antippen zum Senden" : "Nach oben schieben zum Sperren";
     }
-
     function hideHint() {
         const hint = document.getElementById("recordingHint");
         if (hint) hint.remove();
     }
 
-    // --- Recognition Events ---
-    recognition.onresult = (event) => {
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-            if (event.results[i].isFinal) {
-                fullTranscript += " " + event.results[i][0].transcript;
+    // --- Neue Recognition-Instanz starten (kein continuous — verhindert Chrome-Replay-Bug) ---
+    function startSession() {
+        const rec = new SpeechRecognition();
+        rec.lang = "de-DE";
+        rec.continuous = false;
+        rec.interimResults = false;
+        rec.maxAlternatives = 1;
+        activeRec = rec;
+
+        rec.onresult = (event) => {
+            for (let i = 0; i < event.results.length; i++) {
+                if (event.results[i].isFinal) {
+                    fullTranscript += " " + event.results[i][0].transcript;
+                }
             }
-        }
-    };
+        };
 
-    recognition.onend = () => {
-        // Auto-restart wenn wir noch aufnehmen
-        if (!intentionalStop && (recordingMode === "holding" || recordingMode === "locked")) {
-            setTimeout(() => {
-                try { recognition.start(); } catch(e) {}
-            }, 150);
-            return;
-        }
+        rec.onend = () => {
+            if (activeRec !== rec) return; // veraltete Instanz ignorieren
+            if (recordingMode === "holding" || recordingMode === "locked") {
+                // Weiter aufnehmen — neue Instanz starten
+                setTimeout(startSession, 100);
+            }
+        };
 
-        // Intentional stop — verarbeiten
-        intentionalStop = false;
+        rec.onerror = (e) => {
+            if (e.error === "no-speech" || e.error === "aborted" || e.error === "network") return;
+            finishRecording();
+        };
+
+        try { rec.start(); } catch(e) {}
+    }
+
+    function finishRecording() {
         recordingMode = "idle";
         micBtn.classList.remove("recording", "locked");
         hideHint();
         stopTimer();
-
-        const text = fullTranscript.trim();
-        fullTranscript = "";
-
-        if (text) {
-            const input = document.getElementById("chatInput");
-            input.value = (input.value + " " + text).trim();
-            input.style.height = "auto";
-            input.style.height = Math.min(input.scrollHeight, 120) + "px";
-            setTimeout(sendMessage, 150);
+        if (activeRec) {
+            try { activeRec.stop(); } catch(e) {}
+            activeRec = null;
         }
-    };
-
-    recognition.onerror = (e) => {
-        // Für diese Fehler einfach weiter aufnehmen (onend übernimmt den Neustart)
-        if (e.error === "no-speech" || e.error === "aborted" || e.error === "network") return;
-        // Echter Fehler — alles zurücksetzen
-        intentionalStop = true;
-        recordingMode = "idle";
-        micBtn.classList.remove("recording", "locked");
-        hideHint();
-        stopTimer();
-        fullTranscript = "";
-    };
-
-    function stopRecording() {
-        intentionalStop = true;
-        try { recognition.stop(); } catch(e) {
-            // Recognition war gerade nicht aktiv — onend manuell triggern
-            intentionalStop = false;
-            recordingMode = "idle";
-            micBtn.classList.remove("recording", "locked");
-            hideHint();
-            stopTimer();
+        // Kurz warten damit letztes onresult noch feuern kann
+        setTimeout(() => {
             const text = fullTranscript.trim();
             fullTranscript = "";
             if (text) {
@@ -395,22 +371,23 @@ function initVoice() {
                 input.value = (input.value + " " + text).trim();
                 input.style.height = "auto";
                 input.style.height = Math.min(input.scrollHeight, 120) + "px";
-                setTimeout(sendMessage, 150);
+                sendMessage();
             }
-        }
+        }, 300);
     }
 
     function startRecording() {
         fullTranscript = "";
-        intentionalStop = false;
-        try { recognition.start(); } catch(e) {}
+        startSession();
         startTimer();
     }
 
-    // --- Mobile: Gedrückt halten ---
+    // --- Mobile Touch ---
     micBtn.addEventListener("touchstart", (e) => {
-        e.preventDefault();
+        e.preventDefault(); // verhindert Ghost-Click nach touchend
+        touchMoved = false;
         if (recordingMode === "locked") return;
+        if (recordingMode === "holding") return;
         touchStartY = e.touches[0].clientY;
         recordingMode = "holding";
         micBtn.classList.add("recording");
@@ -420,6 +397,7 @@ function initVoice() {
 
     micBtn.addEventListener("touchmove", (e) => {
         if (recordingMode !== "holding") return;
+        touchMoved = true;
         const dy = e.touches[0].clientY - touchStartY;
         if (dy < -50) {
             recordingMode = "locked";
@@ -428,27 +406,20 @@ function initVoice() {
         }
     }, { passive: true });
 
-    let touchMoved = false;
-    micBtn.addEventListener("touchstart", (e) => {
-        touchMoved = false;
-    }, { passive: true, capture: true });
-
-    micBtn.addEventListener("touchmove", (e) => {
-        touchMoved = true;
-    }, { passive: true, capture: true });
-
     micBtn.addEventListener("touchend", (e) => {
+        e.preventDefault(); // verhindert Ghost-Click
         if (recordingMode === "holding") {
-            stopRecording(); // Loslassen = senden
+            finishRecording();
         } else if (recordingMode === "locked" && !touchMoved) {
-            stopRecording(); // Kurzer Tap im gesperrten Modus = senden
+            finishRecording(); // kurzer Tap = senden
         }
+        touchMoved = false;
     });
 
-    // --- Desktop: Klick zum Starten/Senden ---
+    // --- Desktop Klick ---
     micBtn.addEventListener("click", () => {
         if (recordingMode === "locked") {
-            stopRecording();
+            finishRecording();
         } else if (recordingMode === "idle") {
             recordingMode = "locked";
             micBtn.classList.add("recording", "locked");
