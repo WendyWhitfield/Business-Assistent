@@ -15,6 +15,13 @@ document.addEventListener("DOMContentLoaded", () => {
     switchSection("home", "Let's do this! 🤍");
 });
 
+// Beim Schließen/Wechseln des Tabs automatisch speichern
+document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") {
+        saveCurrentSession();
+    }
+});
+
 // === NAVIGATION ===
 function initNavigation() {
     document.querySelectorAll(".nav-item").forEach(item => {
@@ -32,7 +39,21 @@ function initNavigation() {
     });
 }
 
+async function saveCurrentSession() {
+    if (!currentSection || currentSection === "home") return;
+    try {
+        await fetch("/api/session-save", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ section: currentSection })
+        });
+    } catch(e) {}
+}
+
 async function switchSection(section, label) {
+    // Aktuelles Gespräch im Hub speichern bevor gewechselt wird
+    await saveCurrentSession();
+
     currentSection = section;
     document.getElementById("sectionLabel").textContent = label;
 

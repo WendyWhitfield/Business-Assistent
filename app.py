@@ -114,6 +114,33 @@ def update_hub(new_content):
     with open(HUB_PATH, "w", encoding="utf-8") as f:
         f.write(updated)
 
+def save_session_summary(section):
+    """Fasst das letzte Gespräch einer Section zusammen und speichert es im Hub."""
+    history = get_chat_history(section, limit=20)
+    if not history or len(history) < 2:
+        return
+    history_text = "\n".join([
+        f"{'Wendy' if m['role'] == 'user' else 'Gwen'}: {m['content'][:400]}"
+        for m in history[-10:]
+    ])
+    summary_prompt = f"""Fasse dieses Gespräch aus dem Bereich "{section}" in 2-4 Sätzen zusammen.
+Was wurde besprochen, entschieden oder geplant? Schreib in Ich-Form (als Gwen) damit ich mich beim nächsten Gespräch erinnern kann.
+Nur die Zusammenfassung, kein Präambel.
+
+{history_text}"""
+    try:
+        response = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=250,
+            messages=[{"role": "user", "content": summary_prompt}]
+        )
+        summary = response.content[0].text.strip()
+        now = datetime.now().strftime('%d.%m.%Y %H:%M')
+        update_hub(f"[Gesprächs-Erinnerung | {section} | {now}]\n{summary}")
+    except:
+        pass
+
+
 def auto_extract_and_save(section, user_message, assistant_message):
     """Extrahiert wichtige Infos und speichert automatisch im Hub."""
     extract_prompt = f"""Analysiere dieses kurze Gespräch aus dem Bereich "{section}".
@@ -239,20 +266,13 @@ def section_start():
     system_prompt = build_system(section)
     history = get_chat_history(section, limit=10)
 
-    if history:
-        # Letzte Nachrichten als Kontext zusammenfassen
-        last_msgs = history[-6:]
-        history_text = "\n".join([
-            f"{'WENDY' if m['role'] == 'user' else 'GWEN'}: {m['content'][:300]}"
-            for m in last_msgs
-        ])
-        start_prompt = f"""Wendy kommt zurück in diesen Bereich. Ihr habt hier schon gesprochen.
+    hub = get_hub_content()
+    hat_erinnerung = f"Gesprächs-Erinnerung | {section}" in hub
 
-Letzter Gesprächsverlauf:
-{history_text}
-
-Knüpfe natürlich daran an — keine neue Begrüßung, kein Wochentag nochmal, kein "Guten Morgen" wieder.
-Zeig kurz dass du dich erinnerst und frag womit sie weitermachen will. Max. 2-3 Sätze."""
+    if hat_erinnerung:
+        start_prompt = f"""Wendy öffnet wieder den Bereich "{section}".
+Im Hub findest du eine Gesprächs-Erinnerung von eurem letzten Gespräch hier.
+Knüpfe kurz daran an — kein "Guten Morgen" nochmal, kein Wochentag. Zeig dass du dich erinnerst, frag womit sie weitermachen will. Max. 2-3 Sätze."""
     else:
         now = datetime.now()
         stunde = now.hour
@@ -264,9 +284,9 @@ Zeig kurz dass du dich erinnerst und frag womit sie weitermachen will. Max. 2-3 
             tageszeit = "Guten Abend"
 
         if section == "home":
-            start_prompt = """Wendy öffnet gerade die App zum ersten Mal. Begrüße sie herzlich. Beziehe dich konkret auf Hub-Inhalt und offene To-Dos. Maximal 8 Sätze."""
+            start_prompt = """Wendy öffnet gerade die App. Begrüße sie herzlich. Beziehe dich konkret auf Hub-Inhalt und offene To-Dos. Maximal 8 Sätze."""
         else:
-            start_prompt = f"""{tageszeit} Wendy — sie öffnet den Bereich "{section}" zum ersten Mal.
+            start_prompt = f"""{tageszeit} Wendy — sie öffnet den Bereich "{section}".
 Begrüße sie kurz. Was ist hier gerade wichtig? Maximal 3-4 Sätze. Warm und direkt."""
 
     try:
@@ -340,6 +360,16 @@ def add_todo():
 def complete(todo_id):
     complete_todo(todo_id)
     return jsonify({"status": "ok"})
+
+@app.route("/api/session-save", methods=["POST"])
+def session_save():
+    """Speichert Gesprächszusammenfassung im Hub wenn Section verlassen wird."""
+    data = request.json
+    section = data.get("section")
+    if section:
+        save_session_summary(section)
+    return jsonify({"status": "ok"})
+
 
 @app.route("/api/history/<section>", methods=["GET"])
 def get_history(section):
