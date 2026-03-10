@@ -321,7 +321,9 @@ function initVoice() {
     recognition.onend = () => {
         // Auto-restart wenn wir noch aufnehmen (Pause erkannt aber User will weitersprechen)
         if (!intentionalStop && (recordingMode === "holding" || recordingMode === "locked")) {
-            try { recognition.start(); } catch(e) {}
+            setTimeout(() => {
+                try { recognition.start(); } catch(e) {}
+            }, 150);
             return;
         }
 
