@@ -16,6 +16,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 DB_PATH = os.path.join(DATA_DIR, "assistant.db")
 HUB_PATH = os.path.join(DATA_DIR, "hub.md")
+ALLTAG_PATH = os.path.join(DATA_DIR, "alltag.md")
 client = Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 
 
@@ -55,6 +56,13 @@ def init_db():
 def get_hub_content():
     try:
         with open(HUB_PATH, "r", encoding="utf-8") as f:
+            return f.read()
+    except:
+        return ""
+
+def get_alltag_content():
+    try:
+        with open(ALLTAG_PATH, "r", encoding="utf-8") as f:
             return f.read()
     except:
         return ""
@@ -116,20 +124,20 @@ def update_hub(new_content):
         f.write(updated)
 
 def replace_section_memory(section, summary):
-    """Ersetzt die Gesprächs-Erinnerung einer Section — überschreibt, hängt nicht an."""
+    """Ersetzt die Erinnerung einer Section im Alltag-Hub — bleibt erhalten, wird nur aktualisiert."""
     try:
-        with open(HUB_PATH, "r", encoding="utf-8") as f:
+        with open(ALLTAG_PATH, "r", encoding="utf-8") as f:
             content = f.read()
     except:
-        content = ""
+        content = "# ALLTAG-HUB — Wendy Whitfield\n"
     now = datetime.now().strftime('%d.%m.%Y %H:%M')
-    new_entry = f"[Gesprächs-Erinnerung | {section} | {now}]\n{summary}"
-    pattern = rf'\[Gesprächs-Erinnerung \| {re.escape(section)} \| [^\]]+\]\n[^\[]*'
+    new_entry = f"[{section} | {now}]\n{summary}"
+    pattern = rf'\[{re.escape(section)} \| [^\]]+\]\n[^\[]*'
     if re.search(pattern, content):
         content = re.sub(pattern, new_entry + "\n\n", content)
     else:
         content = content.rstrip() + f"\n\n---\n{new_entry}"
-    with open(HUB_PATH, "w", encoding="utf-8") as f:
+    with open(ALLTAG_PATH, "w", encoding="utf-8") as f:
         f.write(content)
 
 
@@ -161,43 +169,9 @@ Nur die Zusammenfassung, kein Präambel.
 
 
 def cleanup_hub_memories():
-    """Beim Check-In: alle Gesprächs-Erinnerungen zu einem kompakten Status zusammenfassen und ersetzen."""
-    try:
-        with open(HUB_PATH, "r", encoding="utf-8") as f:
-            content = f.read()
-    except:
-        return
-
-    # Alle Gesprächs-Erinnerungen finden
-    matches = re.findall(r'\[Gesprächs-Erinnerung \| [^\]]+\]\n[^\[]+', content)
-    if not matches or len(matches) < 2:
-        return  # Zu wenig zum Aufräumen
-
-    memories_text = "\n".join([m.strip() for m in matches])
-    cleanup_prompt = f"""Das sind alle Gesprächs-Erinnerungen aus Wendys Business-Assistentin.
-Fasse sie zu einem kompakten "Aktueller Stand" zusammen — was wurde zuletzt besprochen, entschieden, geplant?
-Nur die wichtigsten Infos. Max. 6-8 Sätze. Kein Präambel, direkt der Text.
-
-{memories_text}"""
-
-    try:
-        response = client.messages.create(
-            model="claude-haiku-4-5-20251001",
-            max_tokens=400,
-            messages=[{"role": "user", "content": cleanup_prompt}]
-        )
-        kompakt = response.content[0].text.strip()
-
-        # Alle alten Gesprächs-Erinnerungen aus dem Content entfernen
-        cleaned = re.sub(r'\n*---\n\[Gesprächs-Erinnerung \| [^\]]+\]\n[^\[]+', '', content)
-        cleaned = re.sub(r'\[Gesprächs-Erinnerung \| [^\]]+\]\n[^\[]+', '', cleaned)
-        now = datetime.now().strftime('%d.%m.%Y %H:%M')
-        cleaned = cleaned.rstrip() + f"\n\n---\n[Aktueller Stand | {now}]\n{kompakt}"
-
-        with open(HUB_PATH, "w", encoding="utf-8") as f:
-            f.write(cleaned)
-    except:
-        pass
+    """Beim Check-In: Alltag-Hub bleibt — Section-Einträge bleiben erhalten.
+    Nur wichtige neue Erkenntnisse aus dem Alltag-Hub werden in den Kern-Hub übernommen."""
+    pass  # Section-Erinnerungen im Alltag-Hub bleiben immer erhalten (auch nach Wochen)
 
 
 def auto_extract_and_save(section, user_message, assistant_message):
@@ -207,12 +181,11 @@ def auto_extract_and_save(section, user_message, assistant_message):
 Nutzerin: {user_message}
 Assistent: {assistant_message}
 
-Gibt es WICHTIGE neue Informationen die dauerhaft gespeichert werden sollen?
-Speichere NUR: Entscheidungen, neue Brand-Erkenntnisse, konkrete Pläne, wichtige Infos über die Person/Business.
-NICHT speichern: Small Talk, Fragen ohne Antwort, allgemeine Überlegungen.
-
 Antworte NUR mit validen JSON (kein Markdown, kein Text darum):
-{{"save": true/false, "content": "Kurze Zusammenfassung was gespeichert wird (leer wenn save=false)", "todos": ["To-Do Text falls erwähnt"]}}"""
+{{
+  "kern": "Nur wenn eine echte Entscheidung, neue Erkenntnis oder feste Info die dauerhaft wichtig ist — sonst leer",
+  "todos": ["To-Do Text falls konkret erwähnt"]
+}}"""
 
     try:
         response = client.messages.create(
@@ -222,8 +195,8 @@ Antworte NUR mit validen JSON (kein Markdown, kein Text darum):
         )
         result = json.loads(response.content[0].text)
         saved = False
-        if result.get("save") and result.get("content"):
-            update_hub(f"[{section}] {result['content']}")
+        if result.get("kern", "").strip():
+            update_hub(f"[{section}] {result['kern']}")
             saved = True
         for todo in result.get("todos", []):
             if todo.strip():
@@ -292,7 +265,7 @@ WICHTIG:
 - Du antwortest IMMER in Wendys Brand Voice: direkt, warm, authentisch, kein Marketing-Blabla
 - Dein Name ist Gwen (kurz für Gwendoline) — du bist Wendys persönliche Assistentin
 - Du bist kein generisches KI-Tool — du bist IHR Assistent
-- Du erinnerst dich an alles was im Hub steht — das ist dein Gedächtnis
+- Du erinnerst dich an alles was in beiden Hubs steht — das ist dein Gedächtnis
 - Wichtige Erkenntnisse und Entscheidungen werden automatisch gespeichert
 
 SCHREIBSTIL — ABSOLUT WICHTIG:
@@ -302,8 +275,11 @@ SCHREIBSTIL — ABSOLUT WICHTIG:
 - Reagiere auf den Kontext: Ist heute ein besonderer Tag (Weihnachten, Geburtstag, Montag nach dem Wochenende)? Dann fließt das natürlich ein.
 - Absätze durch Leerzeilen trennen — das ist deine einzige Formatierung
 
-HUB — was du über Wendy weißt:
+KERN-HUB — feste Infos über Wendy (Identität, Angebot, Ziele, Entscheidungen):
 {hub}
+
+ALLTAG-HUB — wo zuletzt gearbeitet wurde, was gerade läuft:
+{alltag}
 
 OFFENE TO-DO'S:
 {todos}
@@ -311,11 +287,11 @@ OFFENE TO-DO'S:
 
 def build_system(section):
     hub = get_hub_content()
+    alltag = get_alltag_content()
     todos = get_open_todos()
     todos_text = "\n".join([f"- [{t['type']}] {t['text']}" for t in todos]) if todos else "Keine offenen To-Do's"
     section_instruction = SECTION_PROMPTS.get(section, "Du hilfst Wendy in diesem Bereich.")
-    # .replace() statt .format() — verhindert KeyError wenn hub.md geschweifte Klammern enthält
-    system = BASE_SYSTEM.replace("{hub}", hub).replace("{todos}", todos_text)
+    system = BASE_SYSTEM.replace("{hub}", hub).replace("{alltag}", alltag).replace("{todos}", todos_text)
     return system + f"\n\nDEIN FOKUS IN DIESEM BEREICH:\n{section_instruction}"
 
 
@@ -335,7 +311,8 @@ def section_start():
     system_prompt = build_system(section)
 
     hub = get_hub_content()
-    hat_erinnerung = f"Gesprächs-Erinnerung | {section}" in hub
+    alltag = get_alltag_content()
+    hat_erinnerung = f"[{section} |" in alltag
 
     now = datetime.now()
     stunde = now.hour
@@ -355,7 +332,7 @@ Folge deinem Check-In Fokus: kurze Begrüßung, was heute ansteht, dann offene F
 
     elif checkin_done or previous_section:
         # Wir sind mitten im Tag — kurzer natürlicher Übergang, kein Tages-Briefing
-        hat_checkin_erinnerung = "Gesprächs-Erinnerung | check-in" in hub
+        hat_checkin_erinnerung = "[check-in |" in alltag
         checkin_kontext = "\nWICHTIG: Im Hub findest du die Gesprächs-Erinnerung vom Check-In heute — dort steht was Wendy heute vorhat und warum sie in diesen Bereich gewechselt ist. Nutze das als Kontext." if hat_checkin_erinnerung else ""
 
         if hat_erinnerung:
