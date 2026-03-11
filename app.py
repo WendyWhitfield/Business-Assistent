@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import os
 import sqlite3
 import json
+import re
 from datetime import datetime
 
 load_dotenv()
@@ -114,8 +115,26 @@ def update_hub(new_content):
     with open(HUB_PATH, "w", encoding="utf-8") as f:
         f.write(updated)
 
+def replace_section_memory(section, summary):
+    """Ersetzt die Gesprächs-Erinnerung einer Section — überschreibt, hängt nicht an."""
+    try:
+        with open(HUB_PATH, "r", encoding="utf-8") as f:
+            content = f.read()
+    except:
+        content = ""
+    now = datetime.now().strftime('%d.%m.%Y %H:%M')
+    new_entry = f"[Gesprächs-Erinnerung | {section} | {now}]\n{summary}"
+    pattern = rf'\[Gesprächs-Erinnerung \| {re.escape(section)} \| [^\]]+\]\n[^\[]*'
+    if re.search(pattern, content):
+        content = re.sub(pattern, new_entry + "\n\n", content)
+    else:
+        content = content.rstrip() + f"\n\n---\n{new_entry}"
+    with open(HUB_PATH, "w", encoding="utf-8") as f:
+        f.write(content)
+
+
 def save_session_summary(section):
-    """Fasst das letzte Gespräch einer Section zusammen und speichert es im Hub."""
+    """Fasst das letzte Gespräch einer Section zusammen und speichert es im Hub (ersetzt altes)."""
     history = get_chat_history(section, limit=20)
     if not history or len(history) < 2:
         return
@@ -124,7 +143,8 @@ def save_session_summary(section):
         for m in history[-10:]
     ])
     summary_prompt = f"""Fasse dieses Gespräch aus dem Bereich "{section}" in 2-4 Sätzen zusammen.
-Was wurde besprochen, entschieden oder geplant? Schreib in Ich-Form (als Gwen) damit ich mich beim nächsten Gespräch erinnern kann.
+Was wurde besprochen, entschieden oder geplant? Was ist der nächste Schritt?
+Schreib in Ich-Form (als Gwen) damit ich mich beim nächsten Gespräch erinnern kann.
 Nur die Zusammenfassung, kein Präambel.
 
 {history_text}"""
@@ -135,8 +155,47 @@ Nur die Zusammenfassung, kein Präambel.
             messages=[{"role": "user", "content": summary_prompt}]
         )
         summary = response.content[0].text.strip()
+        replace_section_memory(section, summary)
+    except:
+        pass
+
+
+def cleanup_hub_memories():
+    """Beim Check-In: alle Gesprächs-Erinnerungen zu einem kompakten Status zusammenfassen und ersetzen."""
+    try:
+        with open(HUB_PATH, "r", encoding="utf-8") as f:
+            content = f.read()
+    except:
+        return
+
+    # Alle Gesprächs-Erinnerungen finden
+    matches = re.findall(r'\[Gesprächs-Erinnerung \| [^\]]+\]\n[^\[]+', content)
+    if not matches or len(matches) < 2:
+        return  # Zu wenig zum Aufräumen
+
+    memories_text = "\n".join([m.strip() for m in matches])
+    cleanup_prompt = f"""Das sind alle Gesprächs-Erinnerungen aus Wendys Business-Assistentin.
+Fasse sie zu einem kompakten "Aktueller Stand" zusammen — was wurde zuletzt besprochen, entschieden, geplant?
+Nur die wichtigsten Infos. Max. 6-8 Sätze. Kein Präambel, direkt der Text.
+
+{memories_text}"""
+
+    try:
+        response = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=400,
+            messages=[{"role": "user", "content": cleanup_prompt}]
+        )
+        kompakt = response.content[0].text.strip()
+
+        # Alle alten Gesprächs-Erinnerungen aus dem Content entfernen
+        cleaned = re.sub(r'\n*---\n\[Gesprächs-Erinnerung \| [^\]]+\]\n[^\[]+', '', content)
+        cleaned = re.sub(r'\[Gesprächs-Erinnerung \| [^\]]+\]\n[^\[]+', '', cleaned)
         now = datetime.now().strftime('%d.%m.%Y %H:%M')
-        update_hub(f"[Gesprächs-Erinnerung | {section} | {now}]\n{summary}")
+        cleaned = cleaned.rstrip() + f"\n\n---\n[Aktueller Stand | {now}]\n{kompakt}"
+
+        with open(HUB_PATH, "w", encoding="utf-8") as f:
+            f.write(cleaned)
     except:
         pass
 
@@ -288,6 +347,8 @@ def section_start():
         tageszeit = "Guten Abend"
 
     if section == "check-in":
+        # Hub aufräumen: alte Erinnerungen zu kompaktem Stand zusammenfassen
+        cleanup_hub_memories()
         # Check-In: immer frische Tages-Eröffnung
         start_prompt = f"""{tageszeit} Wendy — sie startet ihren Tag.
 Folge deinem Check-In Fokus: kurze Begrüßung, was heute ansteht, dann offene Frage damit sie ihren Plan spiegeln kann."""
