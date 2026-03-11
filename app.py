@@ -270,9 +270,10 @@ def section_start():
     """Generiert eine kontextbewusste Begrüßung — frisch oder als Fortsetzung."""
     data = request.json
     section = data.get("section", "business-strategie")
+    previous_section = data.get("previousSection")
+    checkin_done = data.get("checkinDone", False)
 
     system_prompt = build_system(section)
-    history = get_chat_history(section, limit=10)
 
     hub = get_hub_content()
     hat_erinnerung = f"Gesprächs-Erinnerung | {section}" in hub
@@ -287,16 +288,26 @@ def section_start():
         tageszeit = "Guten Abend"
 
     if section == "check-in":
-        # Check-In ist immer eine frische Tages-Eröffnung
-        start_prompt = f"""{tageszeit} Wendy — sie startet gerade ihren Tag und öffnet die App.
+        # Check-In: immer frische Tages-Eröffnung
+        start_prompt = f"""{tageszeit} Wendy — sie startet ihren Tag.
 Folge deinem Check-In Fokus: kurze Begrüßung, was heute ansteht, dann offene Frage damit sie ihren Plan spiegeln kann."""
+
+    elif checkin_done or previous_section:
+        # Wir sind mitten im Tag — kurzer natürlicher Übergang, kein Tages-Briefing
+        if hat_erinnerung:
+            start_prompt = f"""Wendy wechselt gerade in den Bereich "{section}". Ihr habt hier schon mal gesprochen — im Hub ist eine Gesprächs-Erinnerung.
+Sag in einem Satz worum es hier zuletzt ging, und frag womit sie weitermachen will. Kein Tages-Briefing, keine To-Do-Liste — das kennt sie schon. Max. 2 Sätze."""
+        else:
+            start_prompt = f"""Wendy wechselt gerade von "{previous_section or 'einem anderen Bereich'}" in "{section}".
+Mach einen kurzen natürlichen Übergang. Ein Satz was dieser Bereich kann, direkt eine Frage womit sie starten will. Kein Tages-Briefing. Max. 2 Sätze."""
+
     elif hat_erinnerung:
-        start_prompt = f"""Wendy öffnet wieder den Bereich "{section}".
-Im Hub findest du eine Gesprächs-Erinnerung von eurem letzten Gespräch hier.
-Knüpfe kurz daran an — kein "Guten Morgen" nochmal, kein Wochentag. Zeig dass du dich erinnerst, frag womit sie weitermachen will. Max. 2-3 Sätze."""
+        start_prompt = f"""Wendy öffnet wieder den Bereich "{section}". Im Hub ist eine Gesprächs-Erinnerung.
+Knüpfe kurz daran an, frag womit sie weitermachen will. Max. 2-3 Sätze."""
+
     else:
-        start_prompt = f"""{tageszeit} Wendy — sie öffnet den Bereich "{section}".
-Begrüße sie kurz. Was ist hier gerade wichtig? Maximal 3-4 Sätze. Warm und direkt."""
+        start_prompt = f"""{tageszeit} Wendy — sie öffnet den Bereich "{section}" zum ersten Mal.
+Begrüße sie kurz, sag was hier möglich ist. Max. 3 Sätze. Warm und direkt."""
 
     try:
         response = client.messages.create(

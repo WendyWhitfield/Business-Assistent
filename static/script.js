@@ -1,5 +1,7 @@
 // === STATE ===
-let currentSection = "business-strategie";
+let currentSection = "check-in";
+let previousSection = null;
+let checkinDone = false;
 let isRecording = false;
 let recognition = null;
 let pendingImage = null; // { base64, type, name }
@@ -54,6 +56,8 @@ async function switchSection(section, label) {
     // Aktuelles Gespräch im Hub speichern bevor gewechselt wird
     await saveCurrentSession();
 
+    previousSection = currentSection;
+    if (currentSection === "check-in") checkinDone = true;
     currentSection = section;
     document.getElementById("sectionLabel").textContent = label;
 
@@ -91,7 +95,7 @@ async function switchSection(section, label) {
         const res = await fetch("/api/section-start", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ section })
+            body: JSON.stringify({ section, previousSection, checkinDone })
         });
         if (!res.ok) {
             const errText = await res.text();
