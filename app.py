@@ -209,7 +209,15 @@ Der Ton ist wie eine WhatsApp-Nachricht von einer Assistentin die mitdenkt. Warm
     "business-strategie": "Du bist Wendys Business-Sparring-Partner. Großes Bild. Entscheidungen. Richtung. Du kennst ihre Zahlen, ihre Deadline (November 2026), ihre Vision.",
     "content-strategie": "Du entwickelst Wendys Content-Strategie: Themen, Formate, Frequenz, Plattformen. Immer im Kontext ihrer Positionierung und Zielgruppe.",
     "verkaufsstrategie": "Du entwickelst Wendys Verkaufsstrategie: Akquise, Conversion, Pipeline, Preise. Datenbasiert und ehrlich.",
-    "check-in": "Du begleitest Wendys morgendlichen Check-In. Kurz, fokussiert, energiegebend. Du erinnerst an offene To-Do's und hilfst den Tag zu strukturieren.",
+    "check-in": """Du eröffnest Wendys Tag. Wenn sie die App öffnet, startet sie hier.
+
+Deine Aufgabe beim ersten Öffnen:
+1. Begrüße sie kurz und menschlich — variierend, nie gleich
+2. Sag ihr in 2-3 Punkten was heute konkret ansteht (aus Hub + To-Dos)
+3. Stell ihr dann eine offene Frage: "Was nimmst du dir heute vor?" oder ähnlich — damit sie selbst spiegeln kann was sie plant
+
+Wenn sie antwortet und ihren Plan teilt: bestätige kurz, ergänze wenn sinnvoll, und lass sie loslegen.
+Das ist kein langes Coaching — das ist ein kurzes, energetisierendes Eröffnungsritual. Max. 6-8 Sätze für die Begrüßung.""",
     "check-out": "Du begleitest Wendys Tages-Abschluss. Was war gut? Was bleibt offen? Was kommt morgen? Du speicherst To-Do's für morgen automatisch.",
     "todos-morgen": "Du zeigst Wendys To-Do's für morgen und hilfst sie zu priorisieren.",
     "todos-woche": "Du zeigst Wendys Wochen-To-Do's, hilfst priorisieren und erinnerst an Offenes.",
@@ -269,24 +277,25 @@ def section_start():
     hub = get_hub_content()
     hat_erinnerung = f"Gesprächs-Erinnerung | {section}" in hub
 
-    if hat_erinnerung:
+    now = datetime.now()
+    stunde = now.hour
+    if stunde < 12:
+        tageszeit = "Guten Morgen"
+    elif stunde < 17:
+        tageszeit = "Hallo"
+    else:
+        tageszeit = "Guten Abend"
+
+    if section == "check-in":
+        # Check-In ist immer eine frische Tages-Eröffnung
+        start_prompt = f"""{tageszeit} Wendy — sie startet gerade ihren Tag und öffnet die App.
+Folge deinem Check-In Fokus: kurze Begrüßung, was heute ansteht, dann offene Frage damit sie ihren Plan spiegeln kann."""
+    elif hat_erinnerung:
         start_prompt = f"""Wendy öffnet wieder den Bereich "{section}".
 Im Hub findest du eine Gesprächs-Erinnerung von eurem letzten Gespräch hier.
 Knüpfe kurz daran an — kein "Guten Morgen" nochmal, kein Wochentag. Zeig dass du dich erinnerst, frag womit sie weitermachen will. Max. 2-3 Sätze."""
     else:
-        now = datetime.now()
-        stunde = now.hour
-        if stunde < 12:
-            tageszeit = "Guten Morgen"
-        elif stunde < 17:
-            tageszeit = "Hallo"
-        else:
-            tageszeit = "Guten Abend"
-
-        if section == "home":
-            start_prompt = """Wendy öffnet gerade die App. Begrüße sie herzlich. Beziehe dich konkret auf Hub-Inhalt und offene To-Dos. Maximal 8 Sätze."""
-        else:
-            start_prompt = f"""{tageszeit} Wendy — sie öffnet den Bereich "{section}".
+        start_prompt = f"""{tageszeit} Wendy — sie öffnet den Bereich "{section}".
 Begrüße sie kurz. Was ist hier gerade wichtig? Maximal 3-4 Sätze. Warm und direkt."""
 
     try:

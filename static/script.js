@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initHub();
     initMobileMenu();
     initImageUpload();
-    switchSection("home", "Let's do this! 🤍");
+    switchSection("check-in", "Check-In");
 });
 
 // Beim Schließen/Wechseln des Tabs automatisch speichern
