@@ -294,12 +294,15 @@ Folge deinem Check-In Fokus: kurze Begrüßung, was heute ansteht, dann offene F
 
     elif checkin_done or previous_section:
         # Wir sind mitten im Tag — kurzer natürlicher Übergang, kein Tages-Briefing
+        hat_checkin_erinnerung = "Gesprächs-Erinnerung | check-in" in hub
+        checkin_kontext = "\nWICHTIG: Im Hub findest du die Gesprächs-Erinnerung vom Check-In heute — dort steht was Wendy heute vorhat und warum sie in diesen Bereich gewechselt ist. Nutze das als Kontext." if hat_checkin_erinnerung else ""
+
         if hat_erinnerung:
-            start_prompt = f"""Wendy wechselt gerade in den Bereich "{section}". Ihr habt hier schon mal gesprochen — im Hub ist eine Gesprächs-Erinnerung.
-Sag in einem Satz worum es hier zuletzt ging, und frag womit sie weitermachen will. Kein Tages-Briefing, keine To-Do-Liste — das kennt sie schon. Max. 2 Sätze."""
+            start_prompt = f"""Wendy wechselt in den Bereich "{section}". Ihr habt hier schon mal gesprochen — im Hub ist eine Gesprächs-Erinnerung dazu.{checkin_kontext}
+Sag kurz worum es hier zuletzt ging und was als nächstes anstand. Kein Tages-Briefing. Max. 2 Sätze."""
         else:
-            start_prompt = f"""Wendy wechselt gerade von "{previous_section or 'einem anderen Bereich'}" in "{section}".
-Mach einen kurzen natürlichen Übergang. Ein Satz was dieser Bereich kann, direkt eine Frage womit sie starten will. Kein Tages-Briefing. Max. 2 Sätze."""
+            start_prompt = f"""Wendy wechselt gerade von "{previous_section or 'Check-In'}" in "{section}".{checkin_kontext}
+Knüpf direkt an das an was im Check-In besprochen wurde — zeig dass du weißt warum sie jetzt hier ist. Direkt in den Bereich einsteigen, keine allgemeine Begrüßung. Max. 2 Sätze."""
 
     elif hat_erinnerung:
         start_prompt = f"""Wendy öffnet wieder den Bereich "{section}". Im Hub ist eine Gesprächs-Erinnerung.
