@@ -6,6 +6,15 @@ import sqlite3
 import json
 import re
 from datetime import datetime
+try:
+    from zoneinfo import ZoneInfo
+    BERLIN = ZoneInfo("Europe/Berlin")
+except Exception:
+    from datetime import timezone, timedelta
+    BERLIN = timezone(timedelta(hours=1))  # Fallback CET
+
+def now_berlin():
+    return datetime.now(BERLIN)
 
 load_dotenv()
 
@@ -83,7 +92,7 @@ def save_message(section, role, content):
     c = conn.cursor()
     c.execute(
         "INSERT INTO messages (section, role, content, timestamp) VALUES (?, ?, ?, ?)",
-        (section, role, content, datetime.now().isoformat())
+        (section, role, content, now_berlin().isoformat())
     )
     conn.commit()
     conn.close()
@@ -93,7 +102,7 @@ def save_todo(todo_type, text):
     c = conn.cursor()
     c.execute(
         "INSERT INTO todos (type, text, created) VALUES (?, ?, ?)",
-        (todo_type, text, datetime.now().isoformat())
+        (todo_type, text, now_berlin().isoformat())
     )
     conn.commit()
     conn.close()
@@ -119,7 +128,7 @@ def update_hub(new_content):
             current = f.read()
     except:
         current = ""
-    updated = current + f"\n\n---\n[Update {datetime.now().strftime('%d.%m.%Y %H:%M')}]\n{new_content}"
+    updated = current + f"\n\n---\n[Update {now_berlin().strftime('%d.%m.%Y %H:%M')}]\n{new_content}"
     with open(HUB_PATH, "w", encoding="utf-8") as f:
         f.write(updated)
 
@@ -130,7 +139,7 @@ def replace_section_memory(section, summary):
             content = f.read()
     except:
         content = "# ALLTAG-HUB — Wendy Whitfield\n"
-    now = datetime.now().strftime('%d.%m.%Y %H:%M')
+    now = now_berlin().strftime('%d.%m.%Y %H:%M')
     new_entry = f"[{section} | {now}]\n{summary}"
     pattern = rf'\[{re.escape(section)} \| [^\]]+\]\n[^\[]*'
     if re.search(pattern, content):
@@ -261,6 +270,9 @@ Das ist kein langes Coaching — das ist ein kurzes, energetisierendes Eröffnun
 
 BASE_SYSTEM = """Du bist Gwen (Gwendoline) — Wendys persönliche Business-Assistentin. Du kennst sie vollständig — ihre Geschichte, ihre Stimme, ihre Ziele, ihr Business.
 
+AKTUELLES DATUM & UHRZEIT (Berliner Zeit — immer korrekt verwenden!):
+{datum}
+
 WICHTIG:
 - Du antwortest IMMER in Wendys Brand Voice: direkt, warm, authentisch, kein Marketing-Blabla
 - Dein Name ist Gwen (kurz für Gwendoline) — du bist Wendys persönliche Assistentin
@@ -285,13 +297,21 @@ OFFENE TO-DO'S:
 {todos}
 """
 
+WOCHENTAGE = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
+
 def build_system(section):
     hub = get_hub_content()
     alltag = get_alltag_content()
     todos = get_open_todos()
     todos_text = "\n".join([f"- [{t['type']}] {t['text']}" for t in todos]) if todos else "Keine offenen To-Do's"
     section_instruction = SECTION_PROMPTS.get(section, "Du hilfst Wendy in diesem Bereich.")
+
+    now = now_berlin()
+    wochentag = WOCHENTAGE[now.weekday()]
+    datum_text = f"{wochentag}, {now.strftime('%d.%m.%Y')} — {now.strftime('%H:%M')} Uhr (Berliner Zeit)"
+
     system = BASE_SYSTEM.replace("{hub}", hub).replace("{alltag}", alltag).replace("{todos}", todos_text)
+    system = system.replace("{datum}", datum_text)
     return system + f"\n\nDEIN FOKUS IN DIESEM BEREICH:\n{section_instruction}"
 
 
@@ -314,7 +334,7 @@ def section_start():
     alltag = get_alltag_content()
     hat_erinnerung = f"[{section} |" in alltag
 
-    now = datetime.now()
+    now = now_berlin()
     stunde = now.hour
     if stunde < 12:
         tageszeit = "Guten Morgen"
