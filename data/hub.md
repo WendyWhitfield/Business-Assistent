@@ -160,3 +160,15 @@ EmbodyBRAND vorstellen NUR wenn Frau qualifiziert wirkt.
 - App ersetzt CEO Workspace fuer den taeglichen Business-Alltag
 - Assistentin umbenannt: Qwendolin → Gwendoline / Gwen (09.03.2026)
 - Lokal laeuft alles. Railway API-Key-Problem noch offen (morgen fixen)
+
+
+---
+
+## AKTUELLER STAND (15.03.2026)
+
+- Webinar: Di. 17.03. — fertig vorbereitet ✅
+- Testklientinnen (Nadine + Lena): Start 23.03.
+- LinkedIn-Akquise: läuft seit 02.03. (15/Tag)
+- EmbodyBRAND Selbstdurchlauf: Woche 1 (Der Urmensch) abgeschlossen
+- Landingpage EmbodyBRAND.de: hochladen sobald Calendly-Link + E-Mail eingetragen
+- Gwen: vollständig ausgebaut — Dokument-Upload, EmbodyBRAND-Bereich, alle 9 Wochen verfügbar
