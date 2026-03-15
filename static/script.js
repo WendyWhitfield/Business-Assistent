@@ -154,7 +154,7 @@ async function sendMessage() {
 
     try {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 60000);
+        const timeout = setTimeout(() => controller.abort(), 120000);
 
         const body = { section: currentSection, message: text };
         if (imageToSend) {
