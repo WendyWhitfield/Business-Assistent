@@ -5,7 +5,6 @@ let checkinDone = false;
 let isRecording = false;
 let recognition = null;
 let pendingImage = null; // { base64, type, name }
-let pendingDocument = null; // { text, filename }
 
 // === INIT ===
 document.addEventListener("DOMContentLoaded", () => {
@@ -136,7 +135,7 @@ function initInput() {
 async function sendMessage() {
     const input = document.getElementById("chatInput");
     const text = input.value.trim();
-    if (!text && !pendingImage && !pendingDocument) return;
+    if (!text && !pendingImage) return;
 
     input.value = "";
     input.style.height = "auto";
@@ -144,16 +143,12 @@ async function sendMessage() {
     // Nachricht anzeigen
     if (pendingImage) {
         appendImageMessage("user", pendingImage.previewUrl, text);
-    } else if (pendingDocument) {
-        appendDocMessage("user", pendingDocument.filename, text);
     } else {
         appendMessage("user", text);
     }
 
     const imageToSend = pendingImage ? { base64: pendingImage.base64, type: pendingImage.type } : null;
-    const docToSend = pendingDocument ? { text: pendingDocument.text, filename: pendingDocument.filename } : null;
     clearImagePreview();
-    clearDocPreview();
 
     const typing = appendTyping();
 
@@ -161,13 +156,7 @@ async function sendMessage() {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 60000);
 
-        let messageText = text;
-        if (docToSend) {
-            messageText = (text ? text + "\n\n" : "") +
-                `[Dokument: ${docToSend.filename}]\n\n${docToSend.text}`;
-        }
-
-        const body = { section: currentSection, message: messageText };
+        const body = { section: currentSection, message: text };
         if (imageToSend) {
             body.image = imageToSend.base64;
             body.image_type = imageToSend.type;
@@ -568,8 +557,13 @@ function initDocUpload() {
                 appendMessage("assistant", "Dokument konnte nicht geladen werden: " + data.error, false);
                 return;
             }
-            pendingDocument = { text: data.text, filename: data.filename };
-            showDocPreview(data.filename);
+            // Inhalt direkt ins Textarea schreiben — kein JS-State nötig
+            const input = document.getElementById("chatInput");
+            const prefix = `[Dokument: ${data.filename}]\n\n${data.text}\n\n`;
+            input.value = prefix + input.value;
+            input.style.height = "auto";
+            input.style.height = Math.min(input.scrollHeight, 120) + "px";
+            input.focus();
         } catch(e) {
             appendMessage("assistant", "Fehler beim Hochladen des Dokuments.", false);
         } finally {
@@ -577,48 +571,6 @@ function initDocUpload() {
             docBtn.style.opacity = "1";
         }
     });
-}
-
-function showDocPreview(filename) {
-    const existing = document.getElementById("docPreview");
-    if (existing) existing.remove();
-    const area = document.querySelector(".chat-input-area");
-    const preview = document.createElement("div");
-    preview.className = "doc-preview";
-    preview.id = "docPreview";
-    preview.innerHTML = `
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        <span>${filename}</span>
-        <button class="doc-preview-remove" id="docPreviewRemove" title="Entfernen">✕</button>
-    `;
-    area.insertBefore(preview, area.firstChild);
-    document.getElementById("docPreviewRemove").addEventListener("click", clearDocPreview);
-}
-
-function clearDocPreview() {
-    pendingDocument = null;
-    const el = document.getElementById("docPreview");
-    if (el) el.remove();
-}
-
-function appendDocMessage(role, filename, caption) {
-    const messages = document.getElementById("chatMessages");
-    const div = document.createElement("div");
-    div.className = `message ${role}`;
-    const now = new Date();
-    const time = now.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
-    div.innerHTML = `
-        <div class="message-bubble">
-            <div style="display:flex;align-items:center;gap:6px;padding:4px 0;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                <span>${escapeHtml(filename)}</span>
-            </div>
-            ${caption ? `<span>${escapeHtml(caption)}</span>` : ""}
-        </div>
-        <div class="message-time">${time}</div>
-    `;
-    messages.appendChild(div);
-    messages.scrollTop = messages.scrollHeight;
 }
 
 // === MOBILE MENU ===
