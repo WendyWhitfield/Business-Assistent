@@ -480,6 +480,38 @@ def hub_update():
     return jsonify({"status": "ok"})
 
 
+@app.route("/api/parse-document", methods=["POST"])
+def parse_document():
+    file = request.files.get("file")
+    if not file:
+        return jsonify({"error": "Keine Datei"}), 400
+
+    filename = file.filename
+    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+
+    try:
+        if ext == "txt":
+            text = file.read().decode("utf-8", errors="replace")
+        elif ext == "pdf":
+            import pypdf
+            reader = pypdf.PdfReader(file)
+            pages = [page.extract_text() or "" for page in reader.pages]
+            text = "\n\n".join(p for p in pages if p.strip())
+        elif ext == "docx":
+            from docx import Document
+            doc = Document(file)
+            text = "\n".join(p.text for p in doc.paragraphs if p.text.strip())
+        else:
+            return jsonify({"error": "Format nicht unterstützt. Bitte .txt, .pdf oder .docx."}), 400
+
+        if not text.strip():
+            return jsonify({"error": "Dokument ist leer oder konnte nicht gelesen werden."}), 400
+
+        return jsonify({"text": text, "filename": filename})
+    except Exception as e:
+        return jsonify({"error": f"Fehler beim Lesen: {str(e)}"}), 500
+
+
 init_db()
 
 if __name__ == "__main__":

@@ -5,6 +5,7 @@ let checkinDone = false;
 let isRecording = false;
 let recognition = null;
 let pendingImage = null; // { base64, type, name }
+let pendingDocument = null; // { text, filename }
 
 // === INIT ===
 document.addEventListener("DOMContentLoaded", () => {
@@ -14,6 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initHub();
     initMobileMenu();
     initImageUpload();
+    initDocUpload();
     switchSection("check-in", "Check-In");
 });
 
@@ -134,7 +136,7 @@ function initInput() {
 async function sendMessage() {
     const input = document.getElementById("chatInput");
     const text = input.value.trim();
-    if (!text && !pendingImage) return;
+    if (!text && !pendingImage && !pendingDocument) return;
 
     input.value = "";
     input.style.height = "auto";
@@ -142,12 +144,16 @@ async function sendMessage() {
     // Nachricht anzeigen
     if (pendingImage) {
         appendImageMessage("user", pendingImage.previewUrl, text);
+    } else if (pendingDocument) {
+        appendDocMessage("user", pendingDocument.filename, text);
     } else {
         appendMessage("user", text);
     }
 
     const imageToSend = pendingImage ? { base64: pendingImage.base64, type: pendingImage.type } : null;
+    const docToSend = pendingDocument ? { text: pendingDocument.text, filename: pendingDocument.filename } : null;
     clearImagePreview();
+    clearDocPreview();
 
     const typing = appendTyping();
 
@@ -155,7 +161,13 @@ async function sendMessage() {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 60000);
 
-        const body = { section: currentSection, message: text };
+        let messageText = text;
+        if (docToSend) {
+            messageText = (text ? text + "\n\n" : "") +
+                `[Dokument: ${docToSend.filename}]\n\n${docToSend.text}`;
+        }
+
+        const body = { section: currentSection, message: messageText };
         if (imageToSend) {
             body.image = imageToSend.base64;
             body.image_type = imageToSend.type;
@@ -528,6 +540,84 @@ function clearImagePreview() {
     pendingImage = null;
     const el = document.getElementById("imagePreview");
     if (el) el.remove();
+}
+
+// === DOCUMENT UPLOAD ===
+function initDocUpload() {
+    const docBtn = document.getElementById("docBtn");
+    const docInput = document.getElementById("docInput");
+    if (!docBtn || !docInput) return;
+
+    docBtn.addEventListener("click", () => docInput.click());
+
+    docInput.addEventListener("change", async () => {
+        const file = docInput.files[0];
+        if (!file) return;
+        docInput.value = "";
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        docBtn.disabled = true;
+        docBtn.style.opacity = "0.5";
+
+        try {
+            const res = await fetch("/api/parse-document", { method: "POST", body: formData });
+            const data = await res.json();
+            if (data.error) {
+                appendMessage("assistant", "Dokument konnte nicht geladen werden: " + data.error, false);
+                return;
+            }
+            pendingDocument = { text: data.text, filename: data.filename };
+            showDocPreview(data.filename);
+        } catch(e) {
+            appendMessage("assistant", "Fehler beim Hochladen des Dokuments.", false);
+        } finally {
+            docBtn.disabled = false;
+            docBtn.style.opacity = "1";
+        }
+    });
+}
+
+function showDocPreview(filename) {
+    clearDocPreview();
+    const area = document.querySelector(".chat-input-area");
+    const preview = document.createElement("div");
+    preview.className = "doc-preview";
+    preview.id = "docPreview";
+    preview.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span>${filename}</span>
+        <button class="doc-preview-remove" id="docPreviewRemove" title="Entfernen">✕</button>
+    `;
+    area.insertBefore(preview, area.firstChild);
+    document.getElementById("docPreviewRemove").addEventListener("click", clearDocPreview);
+}
+
+function clearDocPreview() {
+    pendingDocument = null;
+    const el = document.getElementById("docPreview");
+    if (el) el.remove();
+}
+
+function appendDocMessage(role, filename, caption) {
+    const messages = document.getElementById("chatMessages");
+    const div = document.createElement("div");
+    div.className = `message ${role}`;
+    const now = new Date();
+    const time = now.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+    div.innerHTML = `
+        <div class="message-bubble">
+            <div style="display:flex;align-items:center;gap:6px;padding:4px 0;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <span>${escapeHtml(filename)}</span>
+            </div>
+            ${caption ? `<span>${escapeHtml(caption)}</span>` : ""}
+        </div>
+        <div class="message-time">${time}</div>
+    `;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
 }
 
 // === MOBILE MENU ===
