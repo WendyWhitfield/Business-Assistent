@@ -580,7 +580,8 @@ function initDocUpload() {
 }
 
 function showDocPreview(filename) {
-    clearDocPreview();
+    const existing = document.getElementById("docPreview");
+    if (existing) existing.remove();
     const area = document.querySelector(".chat-input-area");
     const preview = document.createElement("div");
     preview.className = "doc-preview";
