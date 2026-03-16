@@ -177,6 +177,20 @@ Nur die Zusammenfassung, kein Präambel.
         pass
 
 
+def has_messages_today(section):
+    """Prüft ob es heute schon Nachrichten in dieser Section gibt."""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    today = now_berlin().strftime('%Y-%m-%d')
+    c.execute(
+        "SELECT COUNT(*) FROM messages WHERE section=? AND timestamp LIKE ?",
+        (section, f"{today}%")
+    )
+    count = c.fetchone()[0]
+    conn.close()
+    return count > 0
+
+
 def cleanup_hub_memories():
     """Beim Check-In: Alltag-Hub bleibt — Section-Einträge bleiben erhalten.
     Nur wichtige neue Erkenntnisse aus dem Alltag-Hub werden in den Kern-Hub übernommen."""
@@ -471,6 +485,10 @@ def section_start():
     section = data.get("section", "business-strategie")
     previous_section = data.get("previousSection")
     checkin_done = data.get("checkinDone", False)
+
+    # Heute schon in dieser Section gearbeitet → kein API-Call, einfach überspringen
+    if has_messages_today(section):
+        return jsonify({"skip": True})
 
     system_prompt = build_system(section)
 

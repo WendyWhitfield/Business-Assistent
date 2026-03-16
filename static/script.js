@@ -104,7 +104,9 @@ async function switchSection(section, label) {
         }
         const data = await res.json();
         typing.remove();
-        appendMessage("assistant", data.message, false);
+        if (!data.skip) {
+            appendMessage("assistant", data.message, false);
+        }
     } catch (err) {
         console.error("section-start Fehler:", err);
         typing.remove();
