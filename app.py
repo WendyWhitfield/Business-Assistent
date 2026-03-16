@@ -6,6 +6,7 @@ import sqlite3
 import json
 import re
 from datetime import datetime
+import calendar
 try:
     from zoneinfo import ZoneInfo
     BERLIN = ZoneInfo("Europe/Berlin")
@@ -189,6 +190,45 @@ def has_messages_today(section):
     count = c.fetchone()[0]
     conn.close()
     return count > 0
+
+
+def get_periodic_reminders():
+    """Gibt kontextbezogene Erinnerungen basierend auf dem aktuellen Datum zurück."""
+    now = now_berlin()
+    reminders = []
+
+    # Montag → Wochenziele
+    if now.weekday() == 0:
+        reminders.append("WOCHENBEGINN (Montag): Erinnere Wendy heute beim Check-In daran, ihre Wochenziele festzulegen — was will sie diese Woche erreichen?")
+
+    last_day = calendar.monthrange(now.year, now.month)[1]
+
+    # Letzter Tag des Monats → Monats-Review
+    if now.day == last_day:
+        reminders.append(f"MONATSENDE: Heute ist der letzte Tag des Monats ({now.strftime('%d.%m.%Y')}). Erinnere Wendy ans Monats-Review und daran, Ziele für den nächsten Monat festzulegen.")
+
+    # Erster Tag des Monats → Monatsziele setzen
+    if now.day == 1:
+        reminders.append(f"MONATSBEGINN: Heute startet ein neuer Monat ({now.strftime('%B %Y')}). Erinnere Wendy daran, ihre Monatsziele festzulegen.")
+
+    # Quartalsende (31. März, 30. Juni, 30. Sep, 31. Dez)
+    quarter_end = {3: 31, 6: 30, 9: 30, 12: 31}
+    if now.month in quarter_end and now.day == quarter_end[now.month]:
+        reminders.append("QUARTALSENDE: Heute endet das Quartal. Erinnere Wendy ans Quartals-Review — was wurde erreicht, was bleibt, was kommt?")
+
+    # Quartalsbeginn (1. Jan, Apr, Jul, Okt)
+    if now.month in [1, 4, 7, 10] and now.day == 1:
+        reminders.append("QUARTALSBEGINN: Heute startet ein neues Quartal. Erinnere Wendy daran, ihre Quartalsziele festzulegen.")
+
+    # Jahresende
+    if now.month == 12 and now.day == 31:
+        reminders.append("JAHRESENDE: Heute ist der 31. Dezember — das Jahr endet. Erinnere Wendy ans große Jahres-Review.")
+
+    # Jahresbeginn
+    if now.month == 1 and now.day == 1:
+        reminders.append("JAHRESBEGINN: Heute ist der 1. Januar — ein neues Jahr! Erinnere Wendy daran, ihre Jahresziele festzulegen.")
+
+    return reminders
 
 
 def cleanup_hub_memories():
@@ -445,6 +485,9 @@ SCHREIBSTIL — ABSOLUT WICHTIG:
 - Reagiere auf den Kontext: Ist heute ein besonderer Tag (Weihnachten, Geburtstag, Montag nach dem Wochenende)? Dann fließt das natürlich ein.
 - Absätze durch Leerzeilen trennen — das ist deine einzige Formatierung
 
+TAGESRHYTHMUS — WICHTIG:
+Wendy hat einen festen Check-In/Check-Out-Rhythmus. Wenn sie sich verabschiedet (z.B. "tschüss", "bis morgen", "gute nacht", "ciao", "ich mache Schluss", "ich bin fertig für heute", "bis dann", "muss weg", "feierabend" oder ähnliches), erinnere sie sanft aber klar daran zum Check-Out zu wechseln. Beispiel: "Bevor du gehst — wechsel kurz in den Check-Out, damit wir den Tag zusammenfassen und den Plan für morgen festhalten."
+
 KERN-HUB — feste Infos über Wendy (Identität, Angebot, Ziele, Entscheidungen):
 {hub}
 
@@ -508,9 +551,13 @@ def section_start():
     if section == "check-in":
         # Hub aufräumen: alte Erinnerungen zu kompaktem Stand zusammenfassen
         cleanup_hub_memories()
+        # Periodische Erinnerungen (Montag, Monatsende, etc.)
+        periodic = get_periodic_reminders()
+        periodic_text = "\n".join(periodic)
+        extra = f"\n\nBESONDERE ERINNERUNGEN FÜR HEUTE:\n{periodic_text}" if periodic else ""
         # Check-In: immer frische Tages-Eröffnung
         start_prompt = f"""{tageszeit} Wendy — sie startet ihren Tag.
-Folge deinem Check-In Fokus: kurze Begrüßung, was heute ansteht, dann offene Frage damit sie ihren Plan spiegeln kann."""
+Folge deinem Check-In Fokus: kurze Begrüßung, was heute ansteht, dann offene Frage damit sie ihren Plan spiegeln kann.{extra}"""
 
     elif checkin_done or previous_section:
         # Wir sind mitten im Tag — kurzer natürlicher Übergang, kein Tages-Briefing
