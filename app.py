@@ -29,6 +29,7 @@ HUB_PATH = os.path.join(DATA_DIR, "hub.md")
 ALLTAG_PATH = os.path.join(DATA_DIR, "alltag.md")
 GOALS_PATH = os.path.join(DATA_DIR, "goals.md")
 MILESTONES_PATH = os.path.join(DATA_DIR, "milestones.md")
+ARCHIVE_PATH = os.path.join(DATA_DIR, "archive.md")
 client = Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 
 
@@ -85,6 +86,53 @@ def get_milestones_content():
             return f.read()
     except:
         return ""
+
+def get_archive_content():
+    try:
+        with open(ARCHIVE_PATH, "r", encoding="utf-8") as f:
+            return f.read()
+    except:
+        return ""
+
+def get_archive_for_review(section):
+    """Gibt relevante Archiv-Einträge für den jeweiligen Rückblick zurück."""
+    content = get_archive_content()
+    if not content.strip():
+        return ""
+    now = now_berlin()
+
+    if section == "monatliche-reflexion":
+        # Aktueller Monat + letzter Monat
+        cutoff = now.replace(day=1)
+        if cutoff.month == 1:
+            cutoff = cutoff.replace(year=cutoff.year - 1, month=12)
+        else:
+            cutoff = cutoff.replace(month=cutoff.month - 1)
+        label = f"Monat {now.strftime('%B %Y')}"
+    elif section == "quartalsreflexion":
+        # Letztes Quartal (3 Monate)
+        months_back = 3
+        cutoff = now.replace(month=max(1, now.month - months_back), day=1)
+        label = f"Quartal (letzte 3 Monate)"
+    elif section == "jahresreflexion":
+        # Letztes Jahr
+        cutoff = now.replace(year=now.year - 1, month=1, day=1)
+        label = f"Jahr {now.year}"
+    else:
+        return ""
+
+    # Einträge filtern: Format [KWxx | DD.MM.YYYY]
+    filtered = []
+    for block in re.split(r'\n(?=\[KW)', content):
+        match = re.match(r'\[KW\d+ \| (\d{2})\.(\d{2})\.(\d{4})\]', block)
+        if match:
+            entry_date = datetime(int(match.group(3)), int(match.group(2)), int(match.group(1)))
+            if entry_date >= datetime(cutoff.year, cutoff.month, cutoff.day):
+                filtered.append(block.strip())
+
+    if not filtered:
+        return ""
+    return f"\n\nARCHIV — {label}:\n" + "\n\n".join(filtered)
 
 def add_milestone(text):
     """Fügt einen Meilenstein hinzu — bleibt für immer, eine Zeile."""
@@ -312,8 +360,18 @@ Schreib in Ich-Form (als Gwen). Nur die Zusammenfassung, kein Präambel.
             messages=[{"role": "user", "content": prompt}]
         )
         summary = response.content[0].text.strip()
+        entry = f"[KW{kw} | {now.strftime('%d.%m.%Y')}]\n{summary}\n"
+        # Alltag: nur aktuelle Woche
         with open(ALLTAG_PATH, "w", encoding="utf-8") as f:
-            f.write(f"# ALLTAG-HUB — Wendy Whitfield\n\n---\n[Wochen-Zusammenfassung KW{kw} | {now.strftime('%d.%m.%Y')}]\n{summary}\n")
+            f.write(f"# ALLTAG-HUB — Wendy Whitfield\n\n---\n{entry}")
+        # Archiv: Woche anhängen — bleibt für Rückblicke
+        try:
+            with open(ARCHIVE_PATH, "r", encoding="utf-8") as f:
+                archive = f.read()
+        except:
+            archive = "# ARCHIV — Wendy Whitfield\n\n"
+        with open(ARCHIVE_PATH, "w", encoding="utf-8") as f:
+            f.write(archive + "\n" + entry)
     except:
         pass
 
@@ -628,7 +686,11 @@ def build_system(section):
 
     system = BASE_SYSTEM.replace("{hub}", hub).replace("{alltag}", alltag).replace("{todos}", todos_text).replace("{goals}", goals_text).replace("{milestones}", milestones_text)
     system = system.replace("{datum}", datum_text)
-    return system + f"\n\nDEIN FOKUS IN DIESEM BEREICH:\n{section_instruction}"
+    # Für Rückblick-Sections: relevantes Archiv dazu laden
+    archive_context = ""
+    if section in ["monatliche-reflexion", "quartalsreflexion", "jahresreflexion"]:
+        archive_context = get_archive_for_review(section)
+    return system + f"\n\nDEIN FOKUS IN DIESEM BEREICH:\n{section_instruction}{archive_context}"
 
 
 @app.route("/")
