@@ -28,6 +28,7 @@ DB_PATH = os.path.join(DATA_DIR, "assistant.db")
 HUB_PATH = os.path.join(DATA_DIR, "hub.md")
 ALLTAG_PATH = os.path.join(DATA_DIR, "alltag.md")
 GOALS_PATH = os.path.join(DATA_DIR, "goals.md")
+MILESTONES_PATH = os.path.join(DATA_DIR, "milestones.md")
 client = Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 
 
@@ -77,6 +78,25 @@ def get_alltag_content():
             return f.read()
     except:
         return ""
+
+def get_milestones_content():
+    try:
+        with open(MILESTONES_PATH, "r", encoding="utf-8") as f:
+            return f.read()
+    except:
+        return ""
+
+def add_milestone(text):
+    """Fügt einen Meilenstein hinzu — bleibt für immer, eine Zeile."""
+    now = now_berlin().strftime('%d.%m.%Y')
+    entry = f"[{now}] {text}\n"
+    try:
+        with open(MILESTONES_PATH, "r", encoding="utf-8") as f:
+            current = f.read()
+    except:
+        current = "# MEILENSTEINE — Wendy Whitfield\n\n"
+    with open(MILESTONES_PATH, "w", encoding="utf-8") as f:
+        f.write(current + entry)
 
 def get_goals_content():
     try:
@@ -272,10 +292,36 @@ def get_periodic_reminders():
     return reminders
 
 
+def compress_week_memories():
+    """Komprimiert alle Section-Erinnerungen zu einer kompakten Wochen-Zusammenfassung.
+    Wird freitags beim Check-In aufgerufen. Hält alltag.md schlank."""
+    alltag = get_alltag_content()
+    if not alltag.strip() or alltag.count("[") < 3:
+        return  # Nicht genug zum Komprimieren
+    now = now_berlin()
+    kw = now.isocalendar()[1]
+    prompt = f"""Fasse diese Arbeits-Erinnerungen aus verschiedenen Bereichen kompakt zusammen.
+Max. 6-8 Sätze gesamt. Was wurde diese Woche hauptsächlich gemacht, entschieden, erreicht?
+Schreib in Ich-Form (als Gwen). Nur die Zusammenfassung, kein Präambel.
+
+{alltag}"""
+    try:
+        response = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=300,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        summary = response.content[0].text.strip()
+        with open(ALLTAG_PATH, "w", encoding="utf-8") as f:
+            f.write(f"# ALLTAG-HUB — Wendy Whitfield\n\n---\n[Wochen-Zusammenfassung KW{kw} | {now.strftime('%d.%m.%Y')}]\n{summary}\n")
+    except:
+        pass
+
 def cleanup_hub_memories():
-    """Beim Check-In: Alltag-Hub bleibt — Section-Einträge bleiben erhalten.
-    Nur wichtige neue Erkenntnisse aus dem Alltag-Hub werden in den Kern-Hub übernommen."""
-    pass  # Section-Erinnerungen im Alltag-Hub bleiben immer erhalten (auch nach Wochen)
+    """Beim Check-In: Freitags wird der Alltag-Hub zur Wochen-Zusammenfassung komprimiert."""
+    now = now_berlin()
+    if now.weekday() == 4:  # Freitag
+        compress_week_memories()
 
 
 def auto_extract_and_save(section, user_message, assistant_message):
@@ -287,12 +333,13 @@ Assistent: {assistant_message}
 
 Antworte NUR mit validen JSON (kein Markdown, kein Text darum):
 {{
-  "kern": "Nur wenn eine echte Entscheidung, neue Erkenntnis oder feste Info die dauerhaft wichtig ist — sonst leer",
+  "meilenstein": "Nur wenn ein echter Meilenstein erreicht wurde (z.B. erste Klientin gewonnen, Launch, Umsatzziel erreicht, Programm abgeschlossen) — 1 kurzer Satz oder leer",
+  "info": "Nur wenn eine dauerhafte Entscheidung oder wichtige Änderung am Business — sonst leer (kein Tages-Kram)",
   "todos": ["To-Do Text falls konkret erwähnt"],
   "ziele": {{
     "typ": "täglich|wöchentlich|monatlich|quartalsweise|jährlich — nur wenn im Gespräch explizit Ziele FESTGELEGT wurden, sonst leer",
     "inhalt": "Die Ziele als klarer Text — sonst leer",
-    "erledigt": "täglich|wöchentlich|monatlich|quartalsweise|jährlich — nur wenn Ziele explizit als ERLEDIGT oder ABGESCHLOSSEN markiert wurden, sonst leer"
+    "erledigt": "täglich|wöchentlich|monatlich|quartalsweise|jährlich — nur wenn Ziele explizit als ERLEDIGT markiert wurden, sonst leer"
   }}
 }}"""
 
@@ -304,8 +351,13 @@ Antworte NUR mit validen JSON (kein Markdown, kein Text darum):
         )
         result = json.loads(response.content[0].text)
         saved = False
-        if result.get("kern", "").strip():
-            update_hub(f"[{section}] {result['kern']}")
+        # Meilenstein → dauerhaftes Log (eine Zeile, bleibt für immer)
+        if result.get("meilenstein", "").strip():
+            add_milestone(result["meilenstein"])
+            saved = True
+        # Echte Entscheidung/Änderung → Hub (selektiv, nicht Tages-Kram)
+        if result.get("info", "").strip():
+            update_hub(f"[{section}] {result['info']}")
             saved = True
         for todo in result.get("todos", []):
             if todo.strip():
@@ -552,6 +604,9 @@ OFFENE TO-DO'S:
 AKTUELLE ZIELE (täglich / wöchentlich / monatlich / quartalsweise / jährlich):
 {goals}
 Wenn neue Ziele festgelegt werden, ersetzen sie die alten — nichts häuft sich an.
+
+MEILENSTEINE — was Wendy bereits erreicht hat (dauerhaft, wächst langsam):
+{milestones}
 """
 
 WOCHENTAGE = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
@@ -560,16 +615,18 @@ def build_system(section):
     hub = get_hub_content()
     alltag = get_alltag_content()
     goals = get_goals_content()
+    milestones = get_milestones_content()
     todos = get_open_todos()
     todos_text = "\n".join([f"- [{t['type']}] {t['text']}" for t in todos]) if todos else "Keine offenen To-Do's"
     goals_text = goals if goals.strip() else "Noch keine Ziele festgelegt."
+    milestones_text = milestones if milestones.strip() else "Noch keine Meilensteine eingetragen."
     section_instruction = SECTION_PROMPTS.get(section, "Du hilfst Wendy in diesem Bereich.")
 
     now = now_berlin()
     wochentag = WOCHENTAGE[now.weekday()]
     datum_text = f"{wochentag}, {now.strftime('%d.%m.%Y')} — {now.strftime('%H:%M')} Uhr (Berliner Zeit)"
 
-    system = BASE_SYSTEM.replace("{hub}", hub).replace("{alltag}", alltag).replace("{todos}", todos_text).replace("{goals}", goals_text)
+    system = BASE_SYSTEM.replace("{hub}", hub).replace("{alltag}", alltag).replace("{todos}", todos_text).replace("{goals}", goals_text).replace("{milestones}", milestones_text)
     system = system.replace("{datum}", datum_text)
     return system + f"\n\nDEIN FOKUS IN DIESEM BEREICH:\n{section_instruction}"
 
