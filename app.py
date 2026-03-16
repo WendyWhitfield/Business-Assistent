@@ -27,6 +27,7 @@ DATA_DIR = os.path.join(BASE_DIR, "data")
 DB_PATH = os.path.join(DATA_DIR, "assistant.db")
 HUB_PATH = os.path.join(DATA_DIR, "hub.md")
 ALLTAG_PATH = os.path.join(DATA_DIR, "alltag.md")
+GOALS_PATH = os.path.join(DATA_DIR, "goals.md")
 client = Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 
 
@@ -76,6 +77,42 @@ def get_alltag_content():
             return f.read()
     except:
         return ""
+
+def get_goals_content():
+    try:
+        with open(GOALS_PATH, "r", encoding="utf-8") as f:
+            return f.read()
+    except:
+        return ""
+
+def save_goals(goal_type, goals_text):
+    """Ersetzt Ziele eines Typs komplett — keine Anhäufung, nur das Aktuelle bleibt."""
+    try:
+        with open(GOALS_PATH, "r", encoding="utf-8") as f:
+            content = f.read()
+    except:
+        content = "# ZIELE — Wendy Whitfield\n"
+    now = now_berlin().strftime('%d.%m.%Y')
+    new_section = f"[{goal_type} | {now}]\n{goals_text}"
+    pattern = rf'\[{re.escape(goal_type)} \| [^\]]+\]\n[^\[]*'
+    if re.search(pattern, content):
+        content = re.sub(pattern, new_section + "\n\n", content)
+    else:
+        content = content.rstrip() + f"\n\n---\n{new_section}"
+    with open(GOALS_PATH, "w", encoding="utf-8") as f:
+        f.write(content)
+
+def clear_goals(goal_type):
+    """Löscht Ziele eines Typs wenn sie erledigt sind."""
+    try:
+        with open(GOALS_PATH, "r", encoding="utf-8") as f:
+            content = f.read()
+    except:
+        return
+    pattern = rf'\n*---\n\[{re.escape(goal_type)} \| [^\]]+\]\n[^\[]*'
+    content = re.sub(pattern, "", content)
+    with open(GOALS_PATH, "w", encoding="utf-8") as f:
+        f.write(content)
 
 def get_chat_history(section, limit=20):
     conn = sqlite3.connect(DB_PATH)
@@ -201,6 +238,10 @@ def get_periodic_reminders():
     if now.weekday() == 0:
         reminders.append("WOCHENBEGINN (Montag): Erinnere Wendy heute beim Check-In daran, ihre Wochenziele festzulegen — was will sie diese Woche erreichen?")
 
+    # Freitag → Wochenreflexion
+    if now.weekday() == 4:
+        reminders.append("WOCHENENDE (Freitag): Erinnere Wendy heute daran, die Woche zu reflektieren — was lief gut, was nicht, was nimmt sie mit? Das gehört in den Wachstums-Bereich (woechentliche-reflexion).")
+
     last_day = calendar.monthrange(now.year, now.month)[1]
 
     # Letzter Tag des Monats → Monats-Review
@@ -247,13 +288,18 @@ Assistent: {assistant_message}
 Antworte NUR mit validen JSON (kein Markdown, kein Text darum):
 {{
   "kern": "Nur wenn eine echte Entscheidung, neue Erkenntnis oder feste Info die dauerhaft wichtig ist — sonst leer",
-  "todos": ["To-Do Text falls konkret erwähnt"]
+  "todos": ["To-Do Text falls konkret erwähnt"],
+  "ziele": {{
+    "typ": "täglich|wöchentlich|monatlich|quartalsweise|jährlich — nur wenn im Gespräch explizit Ziele FESTGELEGT wurden, sonst leer",
+    "inhalt": "Die Ziele als klarer Text — sonst leer",
+    "erledigt": "täglich|wöchentlich|monatlich|quartalsweise|jährlich — nur wenn Ziele explizit als ERLEDIGT oder ABGESCHLOSSEN markiert wurden, sonst leer"
+  }}
 }}"""
 
     try:
         response = client.messages.create(
             model="claude-haiku-4-5-20251001",
-            max_tokens=300,
+            max_tokens=400,
             messages=[{"role": "user", "content": extract_prompt}]
         )
         result = json.loads(response.content[0].text)
@@ -264,6 +310,12 @@ Antworte NUR mit validen JSON (kein Markdown, kein Text darum):
         for todo in result.get("todos", []):
             if todo.strip():
                 save_todo("auto", todo)
+        ziele = result.get("ziele", {})
+        if ziele.get("typ", "").strip() and ziele.get("inhalt", "").strip():
+            save_goals(ziele["typ"], ziele["inhalt"])
+            saved = True
+        if ziele.get("erledigt", "").strip():
+            clear_goals(ziele["erledigt"])
         return saved
     except:
         return False
@@ -496,6 +548,10 @@ ALLTAG-HUB — wo zuletzt gearbeitet wurde, was gerade läuft:
 
 OFFENE TO-DO'S:
 {todos}
+
+AKTUELLE ZIELE (täglich / wöchentlich / monatlich / quartalsweise / jährlich):
+{goals}
+Wenn neue Ziele festgelegt werden, ersetzen sie die alten — nichts häuft sich an.
 """
 
 WOCHENTAGE = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
@@ -503,15 +559,17 @@ WOCHENTAGE = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samsta
 def build_system(section):
     hub = get_hub_content()
     alltag = get_alltag_content()
+    goals = get_goals_content()
     todos = get_open_todos()
     todos_text = "\n".join([f"- [{t['type']}] {t['text']}" for t in todos]) if todos else "Keine offenen To-Do's"
+    goals_text = goals if goals.strip() else "Noch keine Ziele festgelegt."
     section_instruction = SECTION_PROMPTS.get(section, "Du hilfst Wendy in diesem Bereich.")
 
     now = now_berlin()
     wochentag = WOCHENTAGE[now.weekday()]
     datum_text = f"{wochentag}, {now.strftime('%d.%m.%Y')} — {now.strftime('%H:%M')} Uhr (Berliner Zeit)"
 
-    system = BASE_SYSTEM.replace("{hub}", hub).replace("{alltag}", alltag).replace("{todos}", todos_text)
+    system = BASE_SYSTEM.replace("{hub}", hub).replace("{alltag}", alltag).replace("{todos}", todos_text).replace("{goals}", goals_text)
     system = system.replace("{datum}", datum_text)
     return system + f"\n\nDEIN FOKUS IN DIESEM BEREICH:\n{section_instruction}"
 
@@ -674,6 +732,28 @@ def get_history(section):
     conn.close()
     messages = [{"role": r[0], "content": r[1], "timestamp": r[2]} for r in reversed(rows)]
     return jsonify({"messages": messages})
+
+
+@app.route("/api/goals", methods=["GET"])
+def api_get_goals():
+    return jsonify({"content": get_goals_content()})
+
+@app.route("/api/goals", methods=["POST"])
+def api_save_goals():
+    data = request.json
+    goal_type = data.get("type", "")
+    content = data.get("content", "")
+    if goal_type and content:
+        save_goals(goal_type, content)
+    return jsonify({"status": "ok"})
+
+@app.route("/api/goals/clear", methods=["POST"])
+def api_clear_goals():
+    data = request.json
+    goal_type = data.get("type", "")
+    if goal_type:
+        clear_goals(goal_type)
+    return jsonify({"status": "ok"})
 
 
 @app.route("/api/hub", methods=["GET"])
