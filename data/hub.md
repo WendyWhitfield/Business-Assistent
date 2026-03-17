@@ -1,174 +1,168 @@
 # HUB — Wendy Whitfield
-> Der Kern des Business. Wird von jedem Bereich automatisch geladen.
-> Zuletzt vollstaendig befuellt: 2026-03-05
+> Gwens Kern-Gedächtnis. Stand: 17.03.2026
 
 ---
 
-## IDENTITAET & POSITIONIERUNG
+## IDENTITÄT & POSITIONIERUNG
 
-**Name:** Wendy Whitfield
-**Rolle:** SOCIAL-Branding-Strategin & KI-Content-Systemerin
-**Kernbotschaft:** "Dein Kern. Deine Geschichte. Deine Brand. So unverwechselbar wie dein Fingerabdruck."
+Name: Wendy Whitfield
+Rolle: SOCIAL-Branding-Strategin & KI-Content-Systemerin
+Kernbotschaft: "Dein Kern. Deine Geschichte. Deine Brand. So unverwechselbar wie dein Fingerabdruck."
 
-**Die einzigartige Kombination:**
-1. 15 Jahre Soziale Arbeit: Menschenkenntnis, Vertrauen, aktives Zuhoeren, Arbeit mit Intensivfaellen
+Superpower — die einzigartige Kombination:
+1. 15 Jahre Soziale Arbeit: Menschenkenntnis, Vertrauen, aktives Zuhören, Intensivfälle
 2. Marketing & Copywriting: Freedom-Writer-Academy, Social Media, E-Mail, Strategie
 3. KI / Claude Code: Content-Systeme, Personalisierung, Automatisierung (Mentor Garrit / KIPA)
 
-**Schluesselerkenntnis:** KI ist das Tool, nicht das Angebot. Der Mensch steht im Mittelpunkt.
+Schlüsselerkenntnis: KI ist das Tool, nicht das Angebot. Der Mensch steht im Mittelpunkt.
 Marketing hat schon immer aus der Sozialen Arbeit geklaut. Das ist Wendys Superpower.
 
-**Persoenlich:** Verlobt mit Patrick. Vision: Camper-Leben, ortunabhaengig, Patrick muss nicht arbeiten.
+Persönlich: Verlobt mit Patrick. Vision: Camper-Leben, ortsunabhängig, Patrick muss nicht arbeiten.
+Nebenjob Soziale Arbeit läuft bis Mitte November 2026.
 
 ---
 
 ## HAUPTANGEBOT: EMBODYBRAND
 
-**Preis:** 13.000 Euro brutto (Netto Wendy ~7.500 Euro)
-**Dauer:** 12 Wochen | **Kapazitaet:** Max. 2 Klientinnen gleichzeitig
-**Ratenzahlung:** Ja, ueber CoCard/Digistore (Gebuehr traegt Klientin)
+Preis: 13.000 Euro brutto (Netto Wendy ca. 7.500 Euro)
+Dauer: 12 Wochen | Max. 2 Klientinnen gleichzeitig
+Ratenzahlung: Ja, über CoCard/Digistore (Gebühr trägt Klientin)
 
-**Was es ist:** Tiefe biografische Markenarbeit. Kein Coaching, keine Therapie.
-Menschen vollstaendig kennenlernen: Muster, Praegungen, Werdegang, Werte, Warum.
-Daraus entsteht eine unverwechselbare Personal Brand.
+Was es ist: Tiefe biografische Markenarbeit. Kein Coaching, keine Therapie.
+Menschen vollständig kennenlernen: Muster, Prägungen, Werdegang, Werte, Warum.
+Daraus entsteht eine unverwechselbare Personal Brand + maßgeschneidertes KI-System.
 
-**Struktur:**
-- Wochen 1-8: 8 Lebensphasen (Kindheit bis Zukunft) je 1x Call 60-90 Min + Workbook + WhatsApp-Sprachnotizen
-- Wochen 9-12: Massgeschneidertes KI-Content-System aufbauen + Uebergabe
+Struktur:
+- Wochen 1-9: Biografische Tiefenarbeit (8 Lebensphasen + Zusammenführung)
+  Je 1 Call 60-90 Min + Workbook + WhatsApp-Sprachnotizen
+- Wochen 10-12: KI-Content-System aufbauen + Übergabe
 
-**Deliverables:** Vollstaendiges Workbook + Brandstory-Dokument + fertiges KI-Content-System
+Deliverables: Vollständiges Workbook + Brandstory-Dokument + fertiges KI-System (Gwen-Instanz)
+Wendy baut alles. Klientin lernt kein Claude Code.
 
-**Was Klientinnen bekommen:** WhatsApp-Begleitung, physisches Workbook, Calls, fertiges KI-System.
-Klientinnen lernen kein Claude Code. Wendy baut alles fuer sie.
+Was EmbodyBRAND einzigartig macht:
+- Biografische Tiefe: 9 Wochen Lebensgeschichte — keine andere Brand-Coach macht das
+- KI als Abschluss: System klingt nach der Klientin, nicht nach Vorlage
+- Wendy als Beweis: Sie geht das Programm selbst durch, dokumentiert öffentlich
 
-**Was EmbodyBRAND einzigartig macht:**
-- Biografische Tiefe: 8 Wochen Lebensgeschichte. Keine andere Brand-Coach macht das.
-- KI als Abschluss: System klingt nach der Klientin, nicht nach Vorlage.
-- Wendy als Beweis: Sie geht das Programm selbst durch, dokumentiert oeffentlich.
+---
+
+## EMBODYRAND INTELLIGENCE RETAINER
+
+Preis: 400 Euro/Monat (inkl. aller laufenden Kosten)
+Enthält:
+- Monatlicher Strategie-Call
+- WhatsApp-Begleitung Mo-Do 9-15 Uhr, Umsetzung innerhalb 24h
+- Technischer Rückhalt: Railway, API, neue Gwen-Bereiche, alle Updates
+- Alle laufenden Kosten inklusive (API ca. 20 Euro + Railway ca. 6 Euro)
+
+Kalkulation: ca. 370 Euro brutto / ca. 160 Euro netto
+Ziel: 10 Retainer-Klientinnen = ca. 1.600 Euro netto/Monat passiv
+Positionierung: Wendy ist die Expertin hinter dem System — Brand Intelligence Partnerschaft, kein Support.
 
 ---
 
 ## IDEALKLIENTIN
 
-**Wer sie ist:**
+Wer sie ist:
 - Etablierte Unternehmerin/Solopreneurin, deutschsprachig, 30-50 Jahre
 - Monatsumsatz 5.000-15.000 Euro, hat sich alles selbst aufgebaut
 - Digital affin, aktiv auf LinkedIn & Instagram
-- Keine Anfaengerin. Das Fundament steht.
+- Keine Anfängerin. Das Fundament steht.
 
-**Ihr innerer Schmerz:**
-- Content fuehlt sich nicht nach ihr an. Postet weil sie muss, nicht weil sie brennt.
+Ihr innerer Schmerz:
+- Content fühlt sich nicht nach ihr an. Postet weil sie muss, nicht weil sie brennt.
 - Kopiert Trends, klingt wie alle anderen. Und sieht das selbst.
-- Hat keine Zeit sich zu fragen: Wer bin ich wirklich? Was macht mich unverwechselbar?
-- Selbstaendig um frei zu sein. Fuehlt sich manchmal wie ein selbst gebauter Kaefig an.
+- Selbständig um frei zu sein — fühlt sich manchmal wie ein selbst gebauter Käfig an.
 
-**Was sie wirklich kauft:** Gesehen werden. Entlastung. Geschichte als Kraft. Klare Identitaet. Bestand.
-
-**Erkennungszeichen LinkedIn:** Postet regelmaessig aber wirkt generisch. Zeigt Expertise aber wenig Persoenlichkeit. Spricht ueber "Sichtbarkeit" oder "Positionierung" als Wunsch.
-
-**Wer NICHT Wendys Kundin ist:** Frauen ohne laufendes Business. Frauen die keine Tiefenarbeit wollen. Frauen die Ergebnisse ohne Eigeninvestment erwarten.
+Was sie wirklich kauft: Gesehen werden. Entlastung. Geschichte als Kraft. Klare Identität. Bestand.
+Wer NICHT passt: Frauen ohne Business. Keine Tiefenarbeit. Ergebnisse ohne Eigeninvestment.
 
 ---
 
 ## BRAND VOICE
 
-**PREMIUM. IMMER.** Wendy verkauft 13.000 Euro. Bei Anfaenger-Energie sofort spiegeln: "Das klingt gerade nach Anfaenger-Zielgruppe. Meinst du das so?"
+PREMIUM. IMMER. Wendy verkauft 13.000 Euro.
+Test: "Boah, genau so ist das" = stimmt. "Schön formuliert" = stimmt nicht.
 
-**Der Test:** Denkt die Leserin "Boah, genau so ist das" -> stimmt. "Schoen formuliert" -> stimmt nicht.
+Wie Wendy schreibt:
+- Kurze Sätze. Viel Luft. Manchmal ein Wort pro Zeile.
+- CAPS statt fett. "..." als Pause. Bricht die vierte Wand.
+- Selbstsicher ohne zu prahlen. Fragen die wehtun, aber sanft.
 
-**Wie Wendy wirklich schreibt:**
-- Schreibt wie sie denkt. Schweift ab, kommentiert sich selbst dabei.
-- Kurze Saetze. Viel Luft. Manchmal ein Wort pro Zeile.
-- CAPS statt fett fuer Betonung.
-- "..." als Pausenzeichen.
-- Bricht die vierte Wand: spricht Leserin direkt an.
-- Selbstsicher ohne zu prahlen: "Dank mir spaeter"
-- Stellt Fragen die wehtun, aber sanft.
+Echte Wörter: krass, geil, Bock, auf jeden, Schwöree, halt, ne, zack, Pustekuchen
+Emojis: Herz-Orange (Signatur), max 2-3 — nie dekorativ
+Signatur: Wendy + Herz + BRAND VOICE | KI | MARKETING | COPYWRITING | BEVEGAN
 
-**Wendys echte Woerter:** "krass", "geil", "Bock", "auf jeden", "Schwoeree", "halt", "ne", "zack", "Pustekuchen", "f*ckt mich ab"
-
-**Emojis:** Herz-Orange (immer Signatur), Gesicht lachend weinend (Selbstironie), Zwinkern, Pflanze (vegan) -- max 2-3 pro Post, nie dekorativ.
-**Signatur:** Wendy + Herz + BRAND VOICE | KI | MARKETING | COPYWRITING | BEVEGAN Pflanze
-
-**VERBOTEN:**
-- "Nicht X, sondern Y" (Wendy nennt das selbst als Negativ-Beispiel)
-- Dreier-Phrasen ("Klar. Direkt. Unverwechselbar.")
-- Marketing-Buzzwords: game-changer, next level, transformativ, revolutionaer
-- Anfaenger-Energie, alles was an Frauen unter 5k/Monat gerichtet ist
+VERBOTEN: "Nicht X sondern Y" / Dreier-Phrasen / Buzzwords / Anfänger-Energie
 
 ---
 
 ## CONTENT-PILLARS
 
-- Pillar 1: Biografische Markenarbeit (25%) -- Deine Geschichte ist deine staerkste Ressource
-- Pillar 2: KI + Menschlichkeit (25%) -- KI ist das Tool, du bist das Angebot
-- Pillar 3: Hinter den Kulissen (20%) -- Wendy als lebender Beweis des Konzepts
-- Pillar 4: Fuer die Zielfrau (20%) -- Direkte Ansprache, Schmerzen ansprechen
-- Pillar 5: Social Proof (10%) -- Erst wenn Ergebnisse vorhanden sind
+1. Biografische Markenarbeit (25%)
+2. KI + Menschlichkeit (25%)
+3. Hinter den Kulissen (20%)
+4. Für die Zielfrau (20%)
+5. Social Proof (10%) — erst wenn Ergebnisse da sind
 
 ---
 
 ## VERTRIEB
 
-**LinkedIn-Akquise:** 15 Kontakte/Tag, max. 3 Nachrichten, kein Pitch, Entweder-Oder-Methode
+LinkedIn-Akquise: 15/Tag, Entweder-Oder-Methode, max. 3 Nachrichten, kein Pitch
+Nachricht 1: Camper vs. All-Inclusive — warm, kein Akquise-Gefühl
+Nachricht 2: Von sich erzählen — "Wie lange bist du schon selbstständig?"
+Nachricht 3: Echter Bezug — "Was machst du denn genau?"
 
-**Einstieg Nachricht 1:** Camper vs. All-Inclusive Frage. Warm, persoenlich, kein Akquise-Gefuehl.
-**Nachricht 2:** Von sich erzaehlen (Camper-Typ) -> "Wie lange bist du schon Selbststaendig?"
-**Nachricht 3:** Echter Bezug auf ihre Antwort -> "Was machst du denn genau?"
-**Wenn sie fragen:** Kurze klare Vorstellung von EmbodyBRAND + "Klingt das ueberhaupt relevant fuer dich?"
-
-**Sales-Prozess:** LinkedIn -> Setting Call (20-30 Min, gegenseitige Qualifizierung) -> Closing Call -> Onboarding
-
-**Setting Call Mindset:** Kein Verkaufsgespraech. Echtes Kennenlernen. Wendy entscheidet auch.
-Qualifizierungs-Fragen: Brand-Situation, Schmerz, KI-Erfahrung.
-EmbodyBRAND vorstellen NUR wenn Frau qualifiziert wirkt.
+Sales-Prozess: LinkedIn → Setting Call (20-30 Min) → Closing Call → Onboarding
+Setting Call: Kein Verkauf. Echtes Kennenlernen. Wendy entscheidet auch.
 
 ---
 
-## ZIELE & AKTUELLER STATUS
+## AKTUELLER STATUS (17.03.2026)
 
-**Hauptziel:** 13.000 Euro netto/Monat = 2 aktive Klientinnen = vollzeit selbststaendig bis November 2026
-**Nebenjob Soziale Arbeit:** laeuft bis Mitte November 2026
+Hauptziel: 13.000 Euro netto/Monat bis November 2026
+Nebenjob Soziale Arbeit läuft parallel bis Mitte November 2026
 
-**Meilensteine:**
-- Erste Klientin: Ende Maerz 2026
-- Webinar: Mitte Maerz 2026 (150-200 Teilnehmer), fertig vorbereitet
-- LinkedIn-Akquise: 15/Tag, laeuft seit 02.03.2026
-- Webseit: vor Webinar live
+Vertrieb:
+- LinkedIn-Akquise läuft seit 02.03. (15/Tag)
+- Testklientinnen Nadine + Lena: Start 23.03.2026 bestätigt
+- Webinar 17.03. — heute, fertig vorbereitet
 
-**Aktueller Stand (09.03.2026):**
-- Vertrieb: Akquise laeuft (seit 02.03., Tag 7), 2 Testkunden bestaetigt, Infocall 11.03. (uebermorgen!)
-- Marketing: Karussell 2 FERTIG ✅ | Karussell 3 als naechstes | Landingpage gestartet 🔄
-- Angebot: EmbodyBRAND definiert ✅ | Webinar fertig vorbereitet ✅
-- Wachstum: EmbodyBRAND Selbstdurchlauf noch nicht gestartet
+Marketing:
+- Brand Voice fertig | Karussell 1+2 fertig | Karussell 3 offen
+- Landingpage EmbodyBRAND.de: gebaut, noch nicht live (Calendly + Fotos fehlen)
 
-**Offene Prioritaeten:**
-1. Infocall 11.03. vorbereiten (Testkunden-Erstgespraech)
-2. Karussell 3 erstellen (Kundenperspektive)
-3. Landingpage/Webseite fertigstellen (vor Webinar Mitte Maerz)
-4. Setting Call Fragen finalisieren
+Eigener EmbodyBRAND-Durchlauf:
+- Woche 1 (Der Urmensch) abgeschlossen
+- Woche 2 offen (startet nach Testklientinnen-Beginn)
 
 ---
 
-## KEY-ENTSCHEIDUNGEN
+## GWEN (KI-ASSISTENTIN-SYSTEM)
 
-- EmbodyBRAND: 13.000 Euro, 12 Wochen, biografische Tiefe + KI-System. Mit Mentor Garrit entwickelt.
-- LinkedIn als primaerer Akquise-Kanal (4.000 Vernetzungen vorhanden)
-- KI ist Tool, nicht Angebot. Mensch im Mittelpunkt. (Kern-Erkenntnis Mentor-Gespraech)
-- Klientinnen-Prozess analog: Calls + WhatsApp + Workbook. KI baut Wendy fuer sie.
-- Business-Assistent App gebaut und auf Railway deployed (05.03.2026)
-- App ersetzt CEO Workspace fuer den taeglichen Business-Alltag
-- Assistentin umbenannt: Qwendolin → Gwendoline / Gwen (09.03.2026)
-- Lokal laeuft alles. Railway API-Key-Problem noch offen (morgen fixen)
+Gwens Fähigkeiten:
+- Chat in allen Bereichen (Haiku Standard / Sonnet per Toggle)
+- Automatisches Speichern: Meilensteine, Entscheidungen, Ziele, To-Dos
+- Tages-Gedächtnis (alle Nachrichten des Tages pro Bereich)
+- Freitags: Wochengedächtnis komprimiert → Archiv für Rückblicke
+- Memory-Tabs: Hub / Alltag / Ziele / Meilensteine direkt sichtbar
+- Hub-Editor: direkt bearbeitbar ohne API-Kosten
 
+Klientinnen-System (White-Label):
+- Env-Variablen: CLIENT_NAME, ASSISTANT_NAME (einfach konfigurierbar)
+- Kosten pro Klientin: ca. 26 Euro/Monat (API + Railway)
+- Wendy richtet alles ein, befüllt Hub, übergibt fertige Assistentin + Onboarding-Video
+
+OFFEN: Railway Volume einrichten damit DB Redeploys überlebt!
 
 ---
 
-## AKTUELLER STAND (15.03.2026)
+## OFFENE PRIORITÄTEN
 
-- Webinar: Di. 17.03. — fertig vorbereitet ✅
-- Testklientinnen (Nadine + Lena): Start 23.03.
-- LinkedIn-Akquise: läuft seit 02.03. (15/Tag)
-- EmbodyBRAND Selbstdurchlauf: Woche 1 (Der Urmensch) abgeschlossen
-- Landingpage EmbodyBRAND.de: hochladen sobald Calendly-Link + E-Mail eingetragen
-- Gwen: vollständig ausgebaut — Dokument-Upload, EmbodyBRAND-Bereich, alle 9 Wochen verfügbar
+1. Railway Volume einrichten (Gedächtnis dauerhaft sichern)
+2. EmbodyBRAND.de live (Calendly-Link + E-Mail + 3 Fotos)
+3. Setting Call Fragen finalisieren
+4. Karussell 3 erstellen
+5. EmbodyBRAND Selbstdurchlauf Woche 2 (nach 23.03.)
