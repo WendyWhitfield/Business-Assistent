@@ -98,23 +98,34 @@ def _mem_set(key, value):
     conn.close()
 
 def _migrate_files_to_db():
-    """Einmalig: bestehende .md-Dateien in die DB übernehmen.
-    Fallback: defaults/-Ordner (im Git, überlebt Volume-Mounts)."""
+    """Hub: IMMER aus Git-Datei laden (data/hub.md > defaults/hub.md).
+    Andere Keys: nur wenn DB leer ist."""
     for key, path in [("hub", HUB_PATH), ("alltag", ALLTAG_PATH),
                       ("goals", GOALS_PATH), ("milestones", MILESTONES_PATH), ("archive", ARCHIVE_PATH)]:
-        if _mem_get(key):
-            continue  # Bereits in DB
-        # Erst data/-Datei versuchen, dann defaults/-Fallback
         default_path = os.path.join(DEFAULTS_DIR, os.path.basename(path))
-        for try_path in [path, default_path]:
-            try:
-                with open(try_path, "r", encoding="utf-8") as f:
-                    content = f.read()
-                if content.strip():
-                    _mem_set(key, content)
-                    break
-            except:
-                continue
+        if key == "hub":
+            # Hub immer frisch aus Datei — Git ist die Quelle der Wahrheit für den Basis-Hub
+            for try_path in [path, default_path]:
+                try:
+                    with open(try_path, "r", encoding="utf-8") as f:
+                        content = f.read()
+                    if content.strip():
+                        _mem_set(key, content)
+                        break
+                except:
+                    continue
+        else:
+            if _mem_get(key):
+                continue  # Anderen Keys: nur wenn leer
+            for try_path in [path, default_path]:
+                try:
+                    with open(try_path, "r", encoding="utf-8") as f:
+                        content = f.read()
+                    if content.strip():
+                        _mem_set(key, content)
+                        break
+                except:
+                    continue
 
 def get_hub_content():
     return _mem_get("hub")
@@ -1047,6 +1058,13 @@ def set_memory_key(key):
     content = data.get("content", "")
     if content:
         _mem_set(key, content)
+        # Hub-Edits auch in Datei schreiben — überlebt Volume-Resets via Git
+        if key == "hub":
+            try:
+                with open(HUB_PATH, "w", encoding="utf-8") as f:
+                    f.write(content)
+            except:
+                pass
     return jsonify({"status": "ok"})
 
 @app.route("/api/hub", methods=["GET"])

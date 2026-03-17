@@ -47,7 +47,7 @@ Was EmbodyBRAND einzigartig macht:
 
 ---
 
-## EMBODYRAND INTELLIGENCE RETAINER
+## EMBODYBRAND INTELLIGENCE RETAINER
 
 Preis: 400 Euro/Monat (inkl. aller laufenden Kosten)
 Enthält:
@@ -128,14 +128,14 @@ Nebenjob Soziale Arbeit läuft parallel bis Mitte November 2026
 Vertrieb:
 - LinkedIn-Akquise läuft seit 02.03. (15/Tag)
 - Testklientinnen Nadine + Lena: Start 23.03.2026 bestätigt
-- Webinar 17.03. — heute, fertig vorbereitet
+- Webinar 17.03. abgeschlossen ✅
 
 Marketing:
-- Brand Voice fertig | Karussell 1+2 fertig | Karussell 3 offen
+- Brand Voice fertig ✅ | Karussell 1+2 fertig | Karussell 3 offen
 - Landingpage EmbodyBRAND.de: gebaut, noch nicht live (Calendly + Fotos fehlen)
 
 Eigener EmbodyBRAND-Durchlauf:
-- Woche 1 (Der Urmensch) abgeschlossen
+- Woche 1 (Der Urmensch) abgeschlossen ✅
 - Woche 2 offen (startet nach Testklientinnen-Beginn)
 
 ---
@@ -149,20 +149,18 @@ Gwens Fähigkeiten:
 - Freitags: Wochengedächtnis komprimiert → Archiv für Rückblicke
 - Memory-Tabs: Hub / Alltag / Ziele / Meilensteine direkt sichtbar
 - Hub-Editor: direkt bearbeitbar ohne API-Kosten
+- Railway Volume: Gedächtnis überlebt Redeploys ✅
 
 Klientinnen-System (White-Label):
 - Env-Variablen: CLIENT_NAME, ASSISTANT_NAME (einfach konfigurierbar)
 - Kosten pro Klientin: ca. 26 Euro/Monat (API + Railway)
 - Wendy richtet alles ein, befüllt Hub, übergibt fertige Assistentin + Onboarding-Video
 
-OFFEN: Railway Volume einrichten damit DB Redeploys überlebt!
-
 ---
 
 ## OFFENE PRIORITÄTEN
 
-1. Railway Volume einrichten (Gedächtnis dauerhaft sichern)
-2. EmbodyBRAND.de live (Calendly-Link + E-Mail + 3 Fotos)
-3. Setting Call Fragen finalisieren
-4. Karussell 3 erstellen
-5. EmbodyBRAND Selbstdurchlauf Woche 2 (nach 23.03.)
+1. EmbodyBRAND.de live (Calendly-Link + E-Mail + 3 Fotos)
+2. Setting Call Fragen finalisieren
+3. Karussell 3 erstellen
+4. EmbodyBRAND Selbstdurchlauf Woche 2 (nach 23.03.)
