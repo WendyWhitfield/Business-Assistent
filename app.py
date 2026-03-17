@@ -21,6 +21,10 @@ load_dotenv()
 
 app = Flask(__name__)
 
+# --- Konfiguration (via .env oder Railway-Variablen anpassbar) ---
+CLIENT_NAME = os.environ.get("CLIENT_NAME", "Wendy")
+ASSISTANT_NAME = os.environ.get("ASSISTANT_NAME", "Gwen")
+
 # Absolute Pfade (wichtig für Railway/Gunicorn)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "data")
@@ -651,14 +655,14 @@ Das ist kein langes Coaching — das ist ein kurzes, energetisierendes Eröffnun
     "jahresreflexion": "Du führst Wendys Jahresabschluss. Vollständige Bilanz: was wurde erreicht, was nicht, wie war das Jahr wirklich.",
 }
 
-BASE_SYSTEM = """Du bist Gwen (Gwendoline) — Wendys persönliche Business-Assistentin. Du kennst sie vollständig — ihre Geschichte, ihre Stimme, ihre Ziele, ihr Business.
+BASE_SYSTEM = """Du bist {assistant_name} — {client_name}s persönliche Business-Assistentin. Du kennst sie vollständig — ihre Geschichte, ihre Stimme, ihre Ziele, ihr Business.
 
 AKTUELLES DATUM & UHRZEIT (Berliner Zeit — immer korrekt verwenden!):
 {datum}
 
 WICHTIG:
-- Du antwortest IMMER in Wendys Brand Voice: direkt, warm, authentisch, kein Marketing-Blabla
-- Dein Name ist Gwen (kurz für Gwendoline) — du bist Wendys persönliche Assistentin
+- Du antwortest IMMER in {client_name}s Brand Voice: direkt, warm, authentisch, kein Marketing-Blabla
+- Dein Name ist {assistant_name} — du bist {client_name}s persönliche Assistentin
 - Du bist kein generisches KI-Tool — du bist IHR Assistent
 - Du erinnerst dich an alles was in beiden Hubs steht — das ist dein Gedächtnis
 - Wichtige Erkenntnisse und Entscheidungen werden automatisch gespeichert
@@ -671,9 +675,9 @@ SCHREIBSTIL — ABSOLUT WICHTIG:
 - Absätze durch Leerzeilen trennen — das ist deine einzige Formatierung
 
 TAGESRHYTHMUS — WICHTIG:
-Wendy hat einen festen Check-In/Check-Out-Rhythmus. Wenn sie sich verabschiedet (z.B. "tschüss", "bis morgen", "gute nacht", "ciao", "ich mache Schluss", "ich bin fertig für heute", "bis dann", "muss weg", "feierabend" oder ähnliches), erinnere sie sanft aber klar daran zum Check-Out zu wechseln. Beispiel: "Bevor du gehst — wechsel kurz in den Check-Out, damit wir den Tag zusammenfassen und den Plan für morgen festhalten."
+{client_name} hat einen festen Check-In/Check-Out-Rhythmus. Wenn sie sich verabschiedet (z.B. "tschüss", "bis morgen", "gute nacht", "ciao", "ich mache Schluss", "ich bin fertig für heute", "bis dann", "muss weg", "feierabend" oder ähnliches), erinnere sie sanft aber klar daran zum Check-Out zu wechseln. Beispiel: "Bevor du gehst — wechsel kurz in den Check-Out, damit wir den Tag zusammenfassen und den Plan für morgen festhalten."
 
-KERN-HUB — feste Infos über Wendy (Identität, Angebot, Ziele, Entscheidungen):
+KERN-HUB — feste Infos über {client_name} (Identität, Angebot, Ziele, Entscheidungen):
 {hub}
 
 ALLTAG-HUB — wo zuletzt gearbeitet wurde, was gerade läuft:
@@ -686,7 +690,7 @@ AKTUELLE ZIELE (täglich / wöchentlich / monatlich / quartalsweise / jährlich)
 {goals}
 Wenn neue Ziele festgelegt werden, ersetzen sie die alten — nichts häuft sich an.
 
-MEILENSTEINE — was Wendy bereits erreicht hat (dauerhaft, wächst langsam):
+MEILENSTEINE — was {client_name} bereits erreicht hat (dauerhaft, wächst langsam):
 {milestones}
 """
 
@@ -709,16 +713,27 @@ def build_system(section):
 
     system = BASE_SYSTEM.replace("{hub}", hub).replace("{alltag}", alltag).replace("{todos}", todos_text).replace("{goals}", goals_text).replace("{milestones}", milestones_text)
     system = system.replace("{datum}", datum_text)
+    system = system.replace("{client_name}", CLIENT_NAME).replace("{assistant_name}", ASSISTANT_NAME)
     # Für Rückblick-Sections: relevantes Archiv dazu laden
     archive_context = ""
     if section in ["monatliche-reflexion", "quartalsreflexion", "jahresreflexion"]:
         archive_context = get_archive_for_review(section)
-    return system + f"\n\nDEIN FOKUS IN DIESEM BEREICH:\n{section_instruction}{archive_context}"
+    full = system + f"\n\nDEIN FOKUS IN DIESEM BEREICH:\n{section_instruction}{archive_context}"
+    # Namen in Section-Prompts ersetzen (für Client-Deployments)
+    if CLIENT_NAME != "Wendy":
+        full = full.replace("Wendy", CLIENT_NAME)
+    if ASSISTANT_NAME != "Gwen":
+        full = full.replace("Gwen", ASSISTANT_NAME).replace("Gwendoline", ASSISTANT_NAME)
+    return full
 
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("index.html", assistant_name=ASSISTANT_NAME, client_name=CLIENT_NAME)
+
+@app.route("/api/config", methods=["GET"])
+def get_config():
+    return jsonify({"assistant_name": ASSISTANT_NAME, "client_name": CLIENT_NAME})
 
 
 @app.route("/api/section-start", methods=["POST"])
