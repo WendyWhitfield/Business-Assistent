@@ -193,6 +193,29 @@ def get_chat_history(section, limit=20):
     conn.close()
     return [{"role": r[0], "content": r[1]} for r in reversed(rows)]
 
+def get_chat_history_today(section, max_per_message=800):
+    """Lädt ALLE Nachrichten von heute in dieser Section.
+    Kürzt sehr lange Nachrichten damit der Kontext nicht überläuft.
+    Fallback auf letzte 60 wenn zu viele Nachrichten."""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    today = now_berlin().strftime('%Y-%m-%d')
+    c.execute(
+        "SELECT role, content FROM messages WHERE section=? AND timestamp LIKE ? ORDER BY id",
+        (section, f"{today}%")
+    )
+    rows = c.fetchall()
+    conn.close()
+    # Sicherheitsnetz: maximal 80 Nachrichten
+    if len(rows) > 80:
+        rows = rows[-80:]
+    result = []
+    for role, content in rows:
+        if len(content) > max_per_message:
+            content = content[:max_per_message] + "…"
+        result.append({"role": role, "content": content})
+    return result
+
 def save_message(section, role, content):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -783,7 +806,7 @@ def chat():
         return jsonify({"error": "Keine Nachricht"}), 400
 
     system_prompt = build_system(section)
-    history = get_chat_history(section)
+    history = get_chat_history_today(section)
 
     if image_data:
         user_content = [
