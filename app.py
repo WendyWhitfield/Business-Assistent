@@ -24,6 +24,7 @@ app = Flask(__name__)
 # --- Konfiguration (via .env oder Railway-Variablen anpassbar) ---
 CLIENT_NAME = os.environ.get("CLIENT_NAME", "Wendy")
 ASSISTANT_NAME = os.environ.get("ASSISTANT_NAME", "Gwen")
+SHOW_EMBODYBRAND = os.environ.get("SHOW_EMBODYBRAND", "true").lower() == "true"
 
 # Absolute Pfade (wichtig für Railway/Gunicorn)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -67,36 +68,59 @@ def init_db():
             timestamp TEXT NOT NULL
         )
     """)
+    # Persistentes Gedächtnis — überlebt jeden Redeploy
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS memory (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL,
+            updated TEXT NOT NULL
+        )
+    """)
+    conn.commit()
+    conn.close()
+    _migrate_files_to_db()
+
+def _mem_get(key):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT value FROM memory WHERE key=?", (key,))
+    row = c.fetchone()
+    conn.close()
+    return row[0] if row else ""
+
+def _mem_set(key, value):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("INSERT OR REPLACE INTO memory (key, value, updated) VALUES (?, ?, ?)",
+              (key, value, now_berlin().isoformat()))
     conn.commit()
     conn.close()
 
+def _migrate_files_to_db():
+    """Einmalig: bestehende .md-Dateien in die DB übernehmen, dann Dateien behalten als Backup."""
+    for key, path in [("hub", HUB_PATH), ("alltag", ALLTAG_PATH),
+                      ("goals", GOALS_PATH), ("milestones", MILESTONES_PATH), ("archive", ARCHIVE_PATH)]:
+        if _mem_get(key):
+            continue  # Bereits in DB
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                content = f.read()
+            if content.strip():
+                _mem_set(key, content)
+        except:
+            pass
+
 def get_hub_content():
-    try:
-        with open(HUB_PATH, "r", encoding="utf-8") as f:
-            return f.read()
-    except:
-        return ""
+    return _mem_get("hub")
 
 def get_alltag_content():
-    try:
-        with open(ALLTAG_PATH, "r", encoding="utf-8") as f:
-            return f.read()
-    except:
-        return ""
+    return _mem_get("alltag")
 
 def get_milestones_content():
-    try:
-        with open(MILESTONES_PATH, "r", encoding="utf-8") as f:
-            return f.read()
-    except:
-        return ""
+    return _mem_get("milestones")
 
 def get_archive_content():
-    try:
-        with open(ARCHIVE_PATH, "r", encoding="utf-8") as f:
-            return f.read()
-    except:
-        return ""
+    return _mem_get("archive")
 
 def get_archive_for_review(section):
     """Gibt relevante Archiv-Einträge für den jeweiligen Rückblick zurück."""
@@ -140,51 +164,33 @@ def get_archive_for_review(section):
 
 def add_milestone(text):
     """Fügt einen Meilenstein hinzu — bleibt für immer, eine Zeile."""
-    now = now_berlin().strftime('%d.%m.%Y')
-    entry = f"[{now}] {text}\n"
-    try:
-        with open(MILESTONES_PATH, "r", encoding="utf-8") as f:
-            current = f.read()
-    except:
-        current = "# MEILENSTEINE — Wendy Whitfield\n\n"
-    with open(MILESTONES_PATH, "w", encoding="utf-8") as f:
-        f.write(current + entry)
+    date = now_berlin().strftime('%d.%m.%Y')
+    entry = f"[{date}] {text}\n"
+    current = _mem_get("milestones") or "# MEILENSTEINE\n\n"
+    _mem_set("milestones", current + entry)
 
 def get_goals_content():
-    try:
-        with open(GOALS_PATH, "r", encoding="utf-8") as f:
-            return f.read()
-    except:
-        return ""
+    return _mem_get("goals")
 
 def save_goals(goal_type, goals_text):
     """Ersetzt Ziele eines Typs komplett — keine Anhäufung, nur das Aktuelle bleibt."""
-    try:
-        with open(GOALS_PATH, "r", encoding="utf-8") as f:
-            content = f.read()
-    except:
-        content = "# ZIELE — Wendy Whitfield\n"
-    now = now_berlin().strftime('%d.%m.%Y')
-    new_section = f"[{goal_type} | {now}]\n{goals_text}"
+    content = _mem_get("goals") or "# ZIELE\n"
+    date = now_berlin().strftime('%d.%m.%Y')
+    new_section = f"[{goal_type} | {date}]\n{goals_text}"
     pattern = rf'\[{re.escape(goal_type)} \| [^\]]+\]\n[^\[]*'
     if re.search(pattern, content):
         content = re.sub(pattern, new_section + "\n\n", content)
     else:
         content = content.rstrip() + f"\n\n---\n{new_section}"
-    with open(GOALS_PATH, "w", encoding="utf-8") as f:
-        f.write(content)
+    _mem_set("goals", content)
 
 def clear_goals(goal_type):
     """Löscht Ziele eines Typs wenn sie erledigt sind."""
-    try:
-        with open(GOALS_PATH, "r", encoding="utf-8") as f:
-            content = f.read()
-    except:
+    content = _mem_get("goals")
+    if not content:
         return
     pattern = rf'\n*---\n\[{re.escape(goal_type)} \| [^\]]+\]\n[^\[]*'
-    content = re.sub(pattern, "", content)
-    with open(GOALS_PATH, "w", encoding="utf-8") as f:
-        f.write(content)
+    _mem_set("goals", re.sub(pattern, "", content))
 
 def get_chat_history(section, limit=20):
     conn = sqlite3.connect(DB_PATH)
@@ -256,22 +262,13 @@ def complete_todo(todo_id):
     conn.close()
 
 def update_hub(new_content):
-    try:
-        with open(HUB_PATH, "r", encoding="utf-8") as f:
-            current = f.read()
-    except:
-        current = ""
+    current = _mem_get("hub") or ""
     updated = current + f"\n\n---\n[Update {now_berlin().strftime('%d.%m.%Y %H:%M')}]\n{new_content}"
-    with open(HUB_PATH, "w", encoding="utf-8") as f:
-        f.write(updated)
+    _mem_set("hub", updated)
 
 def replace_section_memory(section, summary):
     """Ersetzt die Erinnerung einer Section im Alltag-Hub — bleibt erhalten, wird nur aktualisiert."""
-    try:
-        with open(ALLTAG_PATH, "r", encoding="utf-8") as f:
-            content = f.read()
-    except:
-        content = "# ALLTAG-HUB — Wendy Whitfield\n"
+    content = _mem_get("alltag") or "# ALLTAG-HUB\n"
     now = now_berlin().strftime('%d.%m.%Y %H:%M')
     new_entry = f"[{section} | {now}]\n{summary}"
     pattern = rf'\[{re.escape(section)} \| [^\]]+\]\n[^\[]*'
@@ -279,8 +276,7 @@ def replace_section_memory(section, summary):
         content = re.sub(pattern, new_entry + "\n\n", content)
     else:
         content = content.rstrip() + f"\n\n---\n{new_entry}"
-    with open(ALLTAG_PATH, "w", encoding="utf-8") as f:
-        f.write(content)
+    _mem_set("alltag", content)
 
 
 def save_session_summary(section):
@@ -388,17 +384,11 @@ Schreib in Ich-Form (als Gwen). Nur die Zusammenfassung, kein Präambel.
         )
         summary = response.content[0].text.strip()
         entry = f"[KW{kw} | {now.strftime('%d.%m.%Y')}]\n{summary}\n"
-        # Alltag: nur aktuelle Woche
-        with open(ALLTAG_PATH, "w", encoding="utf-8") as f:
-            f.write(f"# ALLTAG-HUB — Wendy Whitfield\n\n---\n{entry}")
-        # Archiv: Woche anhängen — bleibt für Rückblicke
-        try:
-            with open(ARCHIVE_PATH, "r", encoding="utf-8") as f:
-                archive = f.read()
-        except:
-            archive = "# ARCHIV — Wendy Whitfield\n\n"
-        with open(ARCHIVE_PATH, "w", encoding="utf-8") as f:
-            f.write(archive + "\n" + entry)
+        # Alltag: nur aktuelle Woche — alte Details weg
+        _mem_set("alltag", f"# ALLTAG-HUB\n\n---\n{entry}")
+        # Archiv: Woche anhängen — bleibt dauerhaft für Rückblicke
+        archive = _mem_get("archive") or "# ARCHIV\n\n"
+        _mem_set("archive", archive + "\n" + entry)
     except:
         pass
 
@@ -729,7 +719,7 @@ def build_system(section):
 
 @app.route("/")
 def index():
-    return render_template("index.html", assistant_name=ASSISTANT_NAME, client_name=CLIENT_NAME)
+    return render_template("index.html", assistant_name=ASSISTANT_NAME, client_name=CLIENT_NAME, show_embodybrand=SHOW_EMBODYBRAND)
 
 @app.route("/api/config", methods=["GET"])
 def get_config():
@@ -925,6 +915,15 @@ def hub_update():
     content = data.get("content", "")
     if content:
         update_hub(content)
+    return jsonify({"status": "ok"})
+
+@app.route("/api/hub/set", methods=["POST"])
+def hub_set():
+    """Setzt den Hub-Inhalt komplett (für initiales Befüllen durch Wendy)."""
+    data = request.json
+    content = data.get("content", "")
+    if content:
+        _mem_set("hub", content)
     return jsonify({"status": "ok"})
 
 
