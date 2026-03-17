@@ -98,34 +98,22 @@ def _mem_set(key, value):
     conn.close()
 
 def _migrate_files_to_db():
-    """Hub: IMMER aus Git-Datei laden (data/hub.md > defaults/hub.md).
-    Andere Keys: nur wenn DB leer ist."""
+    """Seed-Fallback: Nur wenn DB leer ist — schreibt NIEMALS über vorhandene Daten.
+    defaults/hub.md ist der Fallback wenn Volume leer ist."""
     for key, path in [("hub", HUB_PATH), ("alltag", ALLTAG_PATH),
                       ("goals", GOALS_PATH), ("milestones", MILESTONES_PATH), ("archive", ARCHIVE_PATH)]:
+        if _mem_get(key):
+            continue  # Bereits in DB — NICHT überschreiben
         default_path = os.path.join(DEFAULTS_DIR, os.path.basename(path))
-        if key == "hub":
-            # Hub immer frisch aus Datei — Git ist die Quelle der Wahrheit für den Basis-Hub
-            for try_path in [path, default_path]:
-                try:
-                    with open(try_path, "r", encoding="utf-8") as f:
-                        content = f.read()
-                    if content.strip():
-                        _mem_set(key, content)
-                        break
-                except:
-                    continue
-        else:
-            if _mem_get(key):
-                continue  # Anderen Keys: nur wenn leer
-            for try_path in [path, default_path]:
-                try:
-                    with open(try_path, "r", encoding="utf-8") as f:
-                        content = f.read()
-                    if content.strip():
-                        _mem_set(key, content)
-                        break
-                except:
-                    continue
+        for try_path in [default_path, path]:  # defaults zuerst (immer aktuell in Git)
+            try:
+                with open(try_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+                if content.strip():
+                    _mem_set(key, content)
+                    break
+            except:
+                continue
 
 def get_hub_content():
     return _mem_get("hub")

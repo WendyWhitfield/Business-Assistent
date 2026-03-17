@@ -120,15 +120,16 @@ Setting Call: Kein Verkauf. Echtes Kennenlernen. Wendy entscheidet auch.
 
 ---
 
-## AKTUELLER STATUS (17.03.2026)
+## AKTUELLER STATUS
 
 Hauptziel: 13.000 Euro netto/Monat bis November 2026
 Nebenjob Soziale Arbeit läuft parallel bis Mitte November 2026
 
 Vertrieb:
 - LinkedIn-Akquise läuft seit 02.03. (15/Tag)
-- Testklientinnen Nadine + Lena: Start 23.03.2026 bestätigt
-- Webinar 17.03. abgeschlossen ✅
+- Testklientinnen Nadine + Lena: gestartet 19.03.2026 ✅
+- Erster Klientinnen-Call: 26.03.2026
+- Nächstes Webinar: 06.04.2026
 
 Marketing:
 - Brand Voice fertig ✅ | Karussell 1+2 fertig | Karussell 3 offen
