@@ -5,6 +5,7 @@ let checkinDone = false;
 let isRecording = false;
 let recognition = null;
 let pendingImage = null; // { base64, type, name }
+let useSonnet = false; // Standard: Haiku (günstig). Sonnet auf Anfrage.
 
 // === INIT ===
 document.addEventListener("DOMContentLoaded", () => {
@@ -15,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initMobileMenu();
     initImageUpload();
     initDocUpload();
+    initModelToggle();
     switchSection("check-in", "Check-In");
 });
 
@@ -158,7 +160,7 @@ async function sendMessage() {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 120000);
 
-        const body = { section: currentSection, message: text };
+        const body = { section: currentSection, message: text, sonnet: useSonnet };
         if (imageToSend) {
             body.image = imageToSend.base64;
             body.image_type = imageToSend.type;
@@ -574,6 +576,20 @@ function initDocUpload() {
             docBtn.disabled = false;
             docBtn.style.opacity = "1";
         }
+    });
+}
+
+// === MODEL TOGGLE ===
+function initModelToggle() {
+    const btn = document.getElementById("modelToggle");
+    if (!btn) return;
+    btn.addEventListener("click", () => {
+        useSonnet = !useSonnet;
+        btn.textContent = useSonnet ? "S" : "H";
+        btn.title = useSonnet
+            ? "Sonnet aktiv (stark & komplex) — klicken für Haiku"
+            : "Haiku aktiv (schnell & günstig) — klicken für Sonnet";
+        btn.classList.toggle("sonnet-active", useSonnet);
     });
 }
 

@@ -781,7 +781,7 @@ Begrüße sie kurz, sag was hier möglich ist. Max. 3 Sätze. Warm und direkt.""
 
     try:
         response = client.messages.create(
-            model="claude-sonnet-4-6",
+            model="claude-haiku-4-5-20251001",
             max_tokens=400,
             system=system_prompt,
             messages=[{"role": "user", "content": start_prompt}]
@@ -798,6 +798,8 @@ def chat():
     data = request.json
     section = data.get("section", "business-strategie")
     user_message = data.get("message", "")
+    use_sonnet = data.get("sonnet", False)
+    model = "claude-sonnet-4-6" if use_sonnet else "claude-haiku-4-5-20251001"
 
     image_data = data.get("image")
     image_type = data.get("image_type", "image/jpeg")
@@ -819,7 +821,7 @@ def chat():
     messages = history + [{"role": "user", "content": user_content}]
 
     response = client.messages.create(
-        model="claude-sonnet-4-6",
+        model=model,
         max_tokens=8096,
         system=system_prompt,
         messages=messages

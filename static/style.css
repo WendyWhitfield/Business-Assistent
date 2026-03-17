@@ -512,6 +512,30 @@ textarea#chatInput::placeholder { color: #ccc; }
     padding: 0 4px;
 }
 
+/* === MODEL TOGGLE === */
+.model-toggle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1.5px solid var(--brown-light);
+    background: transparent;
+    color: var(--brown-light);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.model-toggle:hover { border-color: var(--brown); color: var(--brown); }
+.model-toggle.sonnet-active {
+    background: var(--orange);
+    border-color: var(--orange);
+    color: white;
+}
+
 /* === DOCUMENT UPLOAD BUTTON === */
 .doc-btn {
     width: 36px;
