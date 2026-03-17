@@ -414,8 +414,8 @@ Assistent: {assistant_message}
 
 Antworte NUR mit validen JSON (kein Markdown, kein Text darum):
 {{
-  "meilenstein": "Nur wenn ein echter Meilenstein erreicht wurde (z.B. erste Klientin gewonnen, Launch, Umsatzziel erreicht, Programm abgeschlossen) — 1 kurzer Satz oder leer",
-  "info": "Nur wenn eine dauerhafte Entscheidung oder wichtige Änderung am Business — sonst leer (kein Tages-Kram)",
+  "meilenstein": "Wenn ein echter Meilenstein erreicht wurde (erste Klientin gewonnen, Launch, Umsatzziel, Programm-Abschluss) — 1 kurzer Satz oder leer",
+  "info": "Wenn etwas erwähnt wird das dauerhaft für Wendys Business relevant ist: Entscheidungen, Änderungen am Angebot, neue Erkenntnisse über Zielgruppe, Preise, Strategie, Klientinnen-Status, konkrete Pläne. Auch Tages-relevantes wenn es den Fortschritt zeigt. Kurz und präzise — oder leer wenn wirklich nichts Relevantes.",
   "todos": ["To-Do Text falls konkret erwähnt"],
   "ziele": {{
     "typ": "täglich|wöchentlich|monatlich|quartalsweise|jährlich — nur wenn im Gespräch explizit Ziele FESTGELEGT wurden, sonst leer",
@@ -938,7 +938,30 @@ def parse_document():
         if not text.strip():
             return jsonify({"error": "Dokument ist leer oder konnte nicht gelesen werden."}), 400
 
-        return jsonify({"text": text, "filename": filename})
+        # Dokument zusammenfassen wenn länger als 1500 Zeichen
+        if len(text) > 1500:
+            summary_prompt = f"""Fasse dieses Dokument "{filename}" präzise zusammen.
+Struktur:
+- Was ist das für ein Dokument?
+- Die wichtigsten Inhalte / Kernaussagen (max. 8 Punkte)
+- Was könnte für Wendys Business relevant sein?
+
+Halte die Zusammenfassung kompakt (max. 400 Wörter). Nur die Zusammenfassung, kein Präambel.
+
+Dokumentinhalt:
+{text[:8000]}"""
+            try:
+                sum_response = client.messages.create(
+                    model="claude-haiku-4-5-20251001",
+                    max_tokens=600,
+                    messages=[{"role": "user", "content": summary_prompt}]
+                )
+                summary = sum_response.content[0].text.strip()
+                return jsonify({"text": summary, "filename": filename, "summarized": True, "original_length": len(text)})
+            except:
+                pass  # Fallback auf Original wenn Zusammenfassung fehlschlägt
+
+        return jsonify({"text": text, "filename": filename, "summarized": False})
     except Exception as e:
         return jsonify({"error": f"Fehler beim Lesen: {str(e)}"}), 500
 

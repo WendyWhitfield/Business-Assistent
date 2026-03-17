@@ -561,8 +561,10 @@ function initDocUpload() {
             }
             // Inhalt direkt ins Textarea schreiben — kein JS-State nötig
             const input = document.getElementById("chatInput");
-            const prefix = `[Dokument: ${data.filename}]\n\n${data.text}\n\n`;
-            input.value = prefix + input.value;
+            const label = data.summarized
+                ? `[Zusammenfassung von: ${data.filename}]\n\n${data.text}\n\n`
+                : `[Dokument: ${data.filename}]\n\n${data.text}\n\n`;
+            input.value = label + input.value;
             input.style.height = "auto";
             input.style.height = Math.min(input.scrollHeight, 120) + "px";
             input.focus();
