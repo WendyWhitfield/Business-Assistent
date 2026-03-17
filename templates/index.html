@@ -24,8 +24,9 @@
 
             <nav class="sidebar-nav">
 
+                {% if show_embodybrand %}
                 <div class="nav-section collapsed">
-                    <div class="nav-section-title">Wendy-EmbodyBRAND <span class="nav-collapse-arrow">▾</span></div>
+                    <div class="nav-section-title">{{ client_name }}-EmbodyBRAND <span class="nav-collapse-arrow">▾</span></div>
                     <div class="nav-section-items">
                         <a class="nav-item" data-section="wendy-eb-overview">Überblick & Roter Faden</a>
                         <a class="nav-item" data-section="wendy-eb-journal">Tagebuch & Austausch</a>
@@ -40,6 +41,7 @@
                         <a class="nav-item" data-section="wendy-eb-w9">Woche 9 — Zusammenführung</a>
                     </div>
                 </div>
+                {% endif %}
 
                 <div class="nav-section collapsed">
                     <div class="nav-section-title">Personal Brand <span class="nav-collapse-arrow">▾</span></div>
@@ -192,10 +194,18 @@
         <aside class="hub-panel" id="hubPanel">
             <div class="hub-header">
                 <span>Business Kern</span>
-                <button id="hubClose">✕</button>
+                <div class="hub-header-actions">
+                    <button id="hubEditBtn" title="Hub bearbeiten">✏️</button>
+                    <button id="hubClose">✕</button>
+                </div>
             </div>
-            <div class="hub-content" id="hubContent">
-                Lädt...
+            <div class="hub-content" id="hubContent">Lädt...</div>
+            <div class="hub-editor" id="hubEditor" style="display:none;">
+                <textarea id="hubTextarea" placeholder="Hub-Inhalt hier eingeben..."></textarea>
+                <div class="hub-editor-actions">
+                    <button id="hubSaveBtn">Speichern</button>
+                    <button id="hubCancelBtn">Abbrechen</button>
+                </div>
             </div>
         </aside>
 

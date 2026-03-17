@@ -464,6 +464,47 @@ function initHub() {
     const hubToggle = document.getElementById("hubToggle");
     const hubPanel = document.getElementById("hubPanel");
     const hubClose = document.getElementById("hubClose");
+    const hubEditBtn = document.getElementById("hubEditBtn");
+    const hubSaveBtn = document.getElementById("hubSaveBtn");
+    const hubCancelBtn = document.getElementById("hubCancelBtn");
+    const hubContent = document.getElementById("hubContent");
+    const hubEditor = document.getElementById("hubEditor");
+    const hubTextarea = document.getElementById("hubTextarea");
+
+    hubEditBtn.addEventListener("click", () => {
+        hubContent.style.display = "none";
+        hubEditor.style.display = "flex";
+        hubTextarea.value = hubContent.dataset.raw || "";
+        hubTextarea.focus();
+    });
+
+    hubCancelBtn.addEventListener("click", () => {
+        hubEditor.style.display = "none";
+        hubContent.style.display = "block";
+    });
+
+    hubSaveBtn.addEventListener("click", async () => {
+        const content = hubTextarea.value.trim();
+        if (!content) return;
+        hubSaveBtn.textContent = "Speichert...";
+        hubSaveBtn.disabled = true;
+        try {
+            await fetch("/api/hub/set", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ content })
+            });
+            hubContent.dataset.raw = content;
+            hubContent.textContent = content;
+            hubEditor.style.display = "none";
+            hubContent.style.display = "block";
+        } catch(e) {
+            alert("Fehler beim Speichern.");
+        } finally {
+            hubSaveBtn.textContent = "Speichern";
+            hubSaveBtn.disabled = false;
+        }
+    });
 
     hubToggle.addEventListener("click", async () => {
         hubPanel.classList.toggle("open");
@@ -482,6 +523,7 @@ async function loadHub() {
     try {
         const res = await fetch("/api/hub");
         const data = await res.json();
+        hubContent.dataset.raw = data.content || "";
         hubContent.innerHTML = renderMarkdown(data.content);
     } catch {
         hubContent.textContent = "Hub konnte nicht geladen werden.";

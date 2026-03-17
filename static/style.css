@@ -429,16 +429,69 @@ textarea#chatInput::placeholder { color: #ccc; }
          1px  1px 0 var(--white);
 }
 
-#hubClose {
+.hub-header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+#hubClose, #hubEditBtn {
     background: none;
     border: none;
     cursor: pointer;
     color: var(--white);
     font-size: 16px;
     transition: color 0.15s;
+    padding: 2px 4px;
 }
 
-#hubClose:hover { color: var(--yellow); }
+#hubClose:hover, #hubEditBtn:hover { color: var(--yellow); }
+
+.hub-editor {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    gap: 10px;
+}
+
+#hubTextarea {
+    flex: 1;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 8px;
+    color: white;
+    font-size: 12px;
+    line-height: 1.6;
+    padding: 12px;
+    resize: none;
+    font-family: inherit;
+    min-height: 300px;
+}
+
+#hubTextarea:focus { outline: none; border-color: var(--yellow); }
+#hubTextarea::placeholder { color: rgba(255,255,255,0.4); }
+
+.hub-editor-actions {
+    display: flex;
+    gap: 8px;
+}
+
+#hubSaveBtn, #hubCancelBtn {
+    flex: 1;
+    padding: 8px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13px;
+    transition: opacity 0.15s;
+}
+
+#hubSaveBtn { background: var(--yellow); color: var(--brown); }
+#hubCancelBtn { background: rgba(255,255,255,0.15); color: white; }
+#hubSaveBtn:hover, #hubCancelBtn:hover { opacity: 0.85; }
+#hubSaveBtn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .hub-content {
     flex: 1;
