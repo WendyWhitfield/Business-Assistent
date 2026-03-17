@@ -193,15 +193,21 @@
         <!-- HUB PANEL -->
         <aside class="hub-panel" id="hubPanel">
             <div class="hub-header">
-                <span>Business Kern</span>
+                <span>Gwens Gedächtnis</span>
                 <div class="hub-header-actions">
-                    <button id="hubEditBtn" title="Hub bearbeiten">✏️</button>
+                    <button id="hubEditBtn" title="Bearbeiten">✏️</button>
                     <button id="hubClose">✕</button>
                 </div>
             </div>
+            <div class="memory-tabs">
+                <button class="mem-tab active" data-tab="hub">Hub</button>
+                <button class="mem-tab" data-tab="alltag">Alltag</button>
+                <button class="mem-tab" data-tab="goals">Ziele</button>
+                <button class="mem-tab" data-tab="milestones">Meilensteine</button>
+            </div>
             <div class="hub-content" id="hubContent">Lädt...</div>
             <div class="hub-editor" id="hubEditor" style="display:none;">
-                <textarea id="hubTextarea" placeholder="Hub-Inhalt hier eingeben..."></textarea>
+                <textarea id="hubTextarea" placeholder="Inhalt hier eingeben..."></textarea>
                 <div class="hub-editor-actions">
                     <button id="hubSaveBtn">Speichern</button>
                     <button id="hubCancelBtn">Abbrechen</button>

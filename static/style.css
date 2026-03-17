@@ -565,6 +565,47 @@ textarea#chatInput::placeholder { color: #ccc; }
     padding: 0 4px;
 }
 
+/* === MEMORY TABS === */
+.memory-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+    flex-shrink: 0;
+}
+.mem-tab {
+    flex: 1;
+    padding: 5px 4px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: transparent;
+    color: rgba(255,255,255,0.6);
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+}
+.mem-tab:hover { color: white; border-color: rgba(255,255,255,0.5); }
+.mem-tab.active { background: var(--yellow); color: var(--brown); border-color: var(--yellow); }
+
+/* === MEMORY SAVE CARD === */
+.memory-save-card {
+    margin: 4px 12px;
+    padding: 8px 12px;
+    background: rgba(255, 215, 0, 0.08);
+    border-left: 3px solid var(--yellow);
+    border-radius: 0 8px 8px 0;
+    font-size: 11px;
+    color: rgba(0,0,0,0.6);
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    transition: opacity 1s;
+}
+.save-item { display: flex; align-items: flex-start; gap: 6px; line-height: 1.4; }
+.save-icon { flex-shrink: 0; }
+
 /* === MODEL TOGGLE === */
 .model-toggle {
     width: 28px;

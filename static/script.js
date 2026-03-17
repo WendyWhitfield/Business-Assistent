@@ -180,7 +180,7 @@ async function sendMessage() {
         appendMessage("assistant", data.response);
 
         if (data.auto_saved) {
-            showSaveIndicator();
+            showSaveIndicator(data.saved_items);
         }
     } catch (err) {
         typing.remove();
@@ -192,12 +192,19 @@ async function sendMessage() {
     }
 }
 
-function showSaveIndicator() {
-    const indicator = document.createElement("div");
-    indicator.className = "save-indicator";
-    indicator.textContent = "✓ Im Hub gespeichert";
-    document.getElementById("chatMessages").appendChild(indicator);
-    setTimeout(() => indicator.remove(), 3000);
+const SAVE_ICONS = { meilenstein: "🏆", info: "💾", todo: "✅", ziel: "🎯" };
+const SAVE_LABELS = { meilenstein: "Meilenstein", info: "Gespeichert", todo: "To-Do", ziel: "Ziel" };
+
+function showSaveIndicator(savedItems) {
+    if (!savedItems || savedItems.length === 0) return;
+    const messages = document.getElementById("chatMessages");
+    const card = document.createElement("div");
+    card.className = "memory-save-card";
+    card.innerHTML = savedItems.map(item =>
+        `<span class="save-item"><span class="save-icon">${SAVE_ICONS[item.type] || "💾"}</span><strong>${SAVE_LABELS[item.type] || "Gespeichert"}:</strong> ${item.text.slice(0, 80)}${item.text.length > 80 ? "…" : ""}</span>`
+    ).join("");
+    messages.appendChild(card);
+    setTimeout(() => card.style.opacity = "0.4", 5000);
 }
 
 function appendMessage(role, content, showTime = true) {
@@ -489,7 +496,7 @@ function initHub() {
         hubSaveBtn.textContent = "Speichert...";
         hubSaveBtn.disabled = true;
         try {
-            await fetch("/api/hub/set", {
+            await fetch(`/api/memory/${activeTab}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ content })
@@ -506,6 +513,21 @@ function initHub() {
         }
     });
 
+    // Tabs
+    let activeTab = "hub";
+    const editableTabs = ["hub", "goals"];
+    document.querySelectorAll(".mem-tab").forEach(tab => {
+        tab.addEventListener("click", async () => {
+            document.querySelectorAll(".mem-tab").forEach(t => t.classList.remove("active"));
+            tab.classList.add("active");
+            activeTab = tab.dataset.tab;
+            hubEditor.style.display = "none";
+            hubContent.style.display = "block";
+            hubEditBtn.style.display = editableTabs.includes(activeTab) ? "inline-block" : "none";
+            await loadMemoryTab(activeTab);
+        });
+    });
+
     hubToggle.addEventListener("click", async () => {
         hubPanel.classList.toggle("open");
         if (hubPanel.classList.contains("open")) {
@@ -516,6 +538,20 @@ function initHub() {
     hubClose.addEventListener("click", () => {
         hubPanel.classList.remove("open");
     });
+}
+
+async function loadMemoryTab(key) {
+    const hubContent = document.getElementById("hubContent");
+    hubContent.textContent = "Lädt...";
+    try {
+        const res = await fetch(`/api/memory/${key}`);
+        const data = await res.json();
+        const text = data.content || "(noch leer)";
+        hubContent.dataset.raw = text;
+        hubContent.textContent = text;
+    } catch(e) {
+        hubContent.textContent = "Fehler beim Laden.";
+    }
 }
 
 async function loadHub() {

@@ -401,51 +401,55 @@ def cleanup_hub_memories():
 
 def auto_extract_and_save(section, user_message, assistant_message):
     """Extrahiert wichtige Infos und speichert automatisch im Hub."""
-    extract_prompt = f"""Analysiere dieses kurze Gespräch aus dem Bereich "{section}".
+    extract_prompt = f"""Analysiere dieses Gespräch aus dem Bereich "{section}" und extrahiere ALLES was relevant ist.
 
 Nutzerin: {user_message}
 Assistent: {assistant_message}
 
-Antworte NUR mit validen JSON (kein Markdown, kein Text darum):
+Sei GROSSZÜGIG beim Speichern — lieber zu viel als zu wenig. Antworte NUR mit validen JSON:
 {{
-  "meilenstein": "Wenn ein echter Meilenstein erreicht wurde (erste Klientin gewonnen, Launch, Umsatzziel, Programm-Abschluss) — 1 kurzer Satz oder leer",
-  "info": "Wenn etwas erwähnt wird das dauerhaft für Wendys Business relevant ist: Entscheidungen, Änderungen am Angebot, neue Erkenntnisse über Zielgruppe, Preise, Strategie, Klientinnen-Status, konkrete Pläne. Auch Tages-relevantes wenn es den Fortschritt zeigt. Kurz und präzise — oder leer wenn wirklich nichts Relevantes.",
-  "todos": ["To-Do Text falls konkret erwähnt"],
+  "meilenstein": "Echter Meilenstein (Klientin gewonnen, Launch, Ziel erreicht, Abschluss) — 1 Satz oder leer",
+  "info": "ALLES was dauerhaft relevant ist: Entscheidungen, Strategien, Angebots-Updates, Klientinnen-Status, neue Erkenntnisse, Preise, Pläne, was gerade läuft, womit gearbeitet wird. Auch kleinere Dinge wenn sie den aktuellen Stand zeigen. Mehrere Infos mit | trennen. Leer nur wenn wirklich gar nichts Relevantes.",
+  "todos": ["Konkrete To-Dos die genannt wurden"],
   "ziele": {{
-    "typ": "täglich|wöchentlich|monatlich|quartalsweise|jährlich — nur wenn im Gespräch explizit Ziele FESTGELEGT wurden, sonst leer",
-    "inhalt": "Die Ziele als klarer Text — sonst leer",
-    "erledigt": "täglich|wöchentlich|monatlich|quartalsweise|jährlich — nur wenn Ziele explizit als ERLEDIGT markiert wurden, sonst leer"
+    "typ": "täglich|wöchentlich|monatlich|quartalsweise|jährlich — nur wenn Ziele explizit FESTGELEGT wurden",
+    "inhalt": "Die Ziele als Text — sonst leer",
+    "erledigt": "täglich|wöchentlich|monatlich|quartalsweise|jährlich — nur wenn explizit als ERLEDIGT markiert"
   }}
 }}"""
 
     try:
         response = client.messages.create(
             model="claude-haiku-4-5-20251001",
-            max_tokens=400,
+            max_tokens=500,
             messages=[{"role": "user", "content": extract_prompt}]
         )
         result = json.loads(response.content[0].text)
-        saved = False
-        # Meilenstein → dauerhaftes Log (eine Zeile, bleibt für immer)
+        saved_items = []
+
         if result.get("meilenstein", "").strip():
             add_milestone(result["meilenstein"])
-            saved = True
-        # Echte Entscheidung/Änderung → Hub (selektiv, nicht Tages-Kram)
+            saved_items.append({"type": "meilenstein", "text": result["meilenstein"]})
+
         if result.get("info", "").strip():
             update_hub(f"[{section}] {result['info']}")
-            saved = True
+            saved_items.append({"type": "info", "text": result["info"]})
+
         for todo in result.get("todos", []):
             if todo.strip():
                 save_todo("auto", todo)
+                saved_items.append({"type": "todo", "text": todo})
+
         ziele = result.get("ziele", {})
         if ziele.get("typ", "").strip() and ziele.get("inhalt", "").strip():
             save_goals(ziele["typ"], ziele["inhalt"])
-            saved = True
+            saved_items.append({"type": "ziel", "text": f"{ziele['typ']}: {ziele['inhalt'][:80]}"})
         if ziele.get("erledigt", "").strip():
             clear_goals(ziele["erledigt"])
-        return saved
+
+        return saved_items
     except:
-        return False
+        return []
 
 
 # --- System Prompts je Bereich ---
@@ -837,10 +841,9 @@ def chat():
     save_message(section, "user", user_message)
     save_message(section, "assistant", assistant_message)
 
-    # Automatisch wichtige Infos extrahieren und im Hub speichern
-    saved = auto_extract_and_save(section, user_message, assistant_message)
+    saved_items = auto_extract_and_save(section, user_message, assistant_message)
 
-    return jsonify({"response": assistant_message, "auto_saved": saved})
+    return jsonify({"response": assistant_message, "auto_saved": len(saved_items) > 0, "saved_items": saved_items})
 
 
 @app.route("/api/todos", methods=["GET"])
@@ -904,6 +907,24 @@ def api_clear_goals():
         clear_goals(goal_type)
     return jsonify({"status": "ok"})
 
+
+@app.route("/api/memory/<key>", methods=["GET"])
+def get_memory_key(key):
+    allowed = ["hub", "alltag", "goals", "milestones", "archive"]
+    if key not in allowed:
+        return jsonify({"error": "not found"}), 404
+    return jsonify({"content": _mem_get(key) or ""})
+
+@app.route("/api/memory/<key>", methods=["POST"])
+def set_memory_key(key):
+    allowed = ["hub", "goals"]  # Nur diese sind direkt editierbar
+    if key not in allowed:
+        return jsonify({"error": "not allowed"}), 403
+    data = request.json
+    content = data.get("content", "")
+    if content:
+        _mem_set(key, content)
+    return jsonify({"status": "ok"})
 
 @app.route("/api/hub", methods=["GET"])
 def get_hub():
