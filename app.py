@@ -405,57 +405,175 @@ def cleanup_hub_memories():
         compress_week_memories()
 
 
-def auto_extract_and_save(section, user_message, assistant_message):
-    """Extrahiert wichtige Infos und speichert automatisch im Hub."""
-    extract_prompt = f"""Analysiere dieses Gespräch aus dem Bereich "{section}" und extrahiere ALLES was relevant ist.
+# --- Gwen's Tools (Anthropic Tool Use) ---
+GWEN_TOOLS = [
+    {
+        "name": "im_hub_speichern",
+        "description": "Speichert eine wichtige Information dauerhaft im Hub. Nutze das für: neue Erkenntnisse, Entscheidungen, Strategien, Status-Updates, Klientinnen-Infos, Angebots-Änderungen, Preise, Pläne.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "inhalt": {
+                    "type": "string",
+                    "description": "Die Information in einem klaren, vollständigen Satz"
+                }
+            },
+            "required": ["inhalt"]
+        }
+    },
+    {
+        "name": "hub_abschnitt_aktualisieren",
+        "description": "Aktualisiert oder überschreibt einen Abschnitt im Hub wenn eine ältere Info überholt ist — z.B. Klientinnen-Status, aktueller Angebotspreis, laufende Kampagne.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "abschnitt": {
+                    "type": "string",
+                    "description": "Kurze Bezeichnung des Abschnitts (z.B. 'Klientinnen-Status', 'Akquise', 'Angebot EmbodyBRAND')"
+                },
+                "inhalt": {
+                    "type": "string",
+                    "description": "Der neue, aktualisierte Inhalt"
+                }
+            },
+            "required": ["abschnitt", "inhalt"]
+        }
+    },
+    {
+        "name": "todo_hinzufuegen",
+        "description": "Fügt eine konkrete Aufgabe zur To-Do-Liste hinzu.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "aufgabe": {
+                    "type": "string",
+                    "description": "Die konkrete Aufgabe"
+                },
+                "typ": {
+                    "type": "string",
+                    "enum": ["morgen", "diese-woche", "auto"],
+                    "description": "Zeitrahmen: 'morgen', 'diese-woche', oder 'auto'"
+                }
+            },
+            "required": ["aufgabe"]
+        }
+    },
+    {
+        "name": "ziel_setzen",
+        "description": "Setzt oder aktualisiert ein Ziel. Nur wenn Wendy explizit ein Ziel festlegt.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "typ": {
+                    "type": "string",
+                    "enum": ["täglich", "wöchentlich", "monatlich", "quartalsweise", "jährlich"]
+                },
+                "inhalt": {
+                    "type": "string",
+                    "description": "Das Ziel als klarer Text"
+                }
+            },
+            "required": ["typ", "inhalt"]
+        }
+    },
+    {
+        "name": "meilenstein_hinzufuegen",
+        "description": "Fügt einen echten Meilenstein hinzu. Nur für besondere Ereignisse: erste Klientin gewonnen, erfolgreicher Launch, großes Ziel erreicht.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "meilenstein": {
+                    "type": "string",
+                    "description": "Der Meilenstein in einem prägnanten Satz"
+                }
+            },
+            "required": ["meilenstein"]
+        }
+    }
+]
 
-Nutzerin: {user_message}
-Assistent: {assistant_message}
 
-Sei GROSSZÜGIG beim Speichern — lieber zu viel als zu wenig. Antworte NUR mit validen JSON:
-{{
-  "meilenstein": "Echter Meilenstein (Klientin gewonnen, Launch, Ziel erreicht, Abschluss) — 1 Satz oder leer",
-  "info": "ALLES was dauerhaft relevant ist: Entscheidungen, Strategien, Angebots-Updates, Klientinnen-Status, neue Erkenntnisse, Preise, Pläne, was gerade läuft, womit gearbeitet wird. Auch kleinere Dinge wenn sie den aktuellen Stand zeigen. Mehrere Infos mit | trennen. Leer nur wenn wirklich gar nichts Relevantes.",
-  "todos": ["Konkrete To-Dos die genannt wurden"],
-  "ziele": {{
-    "typ": "täglich|wöchentlich|monatlich|quartalsweise|jährlich — nur wenn Ziele explizit FESTGELEGT wurden",
-    "inhalt": "Die Ziele als Text — sonst leer",
-    "erledigt": "täglich|wöchentlich|monatlich|quartalsweise|jährlich — nur wenn explizit als ERLEDIGT markiert"
-  }}
-}}"""
+def execute_tool(name, input_data):
+    """Führt ein Gwen-Tool aus und gibt Preview + Bestätigung zurück."""
+    if name == "im_hub_speichern":
+        inhalt = input_data.get("inhalt", "")
+        update_hub(inhalt)
+        return {"type": "info", "preview": inhalt, "message": f"Im Hub gespeichert."}
 
-    try:
+    elif name == "hub_abschnitt_aktualisieren":
+        abschnitt = input_data.get("abschnitt", "Allgemein")
+        inhalt = input_data.get("inhalt", "")
+        update_hub(f"[{abschnitt} — aktualisiert {now_berlin().strftime('%d.%m.%Y')}] {inhalt}")
+        return {"type": "hub_update", "preview": f"{abschnitt}: {inhalt}", "message": f"Abschnitt '{abschnitt}' aktualisiert."}
+
+    elif name == "todo_hinzufuegen":
+        aufgabe = input_data.get("aufgabe", "")
+        typ = input_data.get("typ", "auto")
+        save_todo(typ, aufgabe)
+        return {"type": "todo", "preview": aufgabe, "message": f"To-Do hinzugefügt."}
+
+    elif name == "ziel_setzen":
+        typ = input_data.get("typ", "wöchentlich")
+        inhalt = input_data.get("inhalt", "")
+        save_goals(typ, inhalt)
+        return {"type": "ziel", "preview": f"{typ}: {inhalt}", "message": f"Ziel gesetzt."}
+
+    elif name == "meilenstein_hinzufuegen":
+        meilenstein = input_data.get("meilenstein", "")
+        add_milestone(meilenstein)
+        return {"type": "meilenstein", "preview": meilenstein, "message": f"Meilenstein gespeichert."}
+
+    return {"type": "unknown", "preview": "", "message": "Unbekanntes Tool"}
+
+
+def run_with_tools(system_prompt, messages, model):
+    """Chat-Loop mit Tool Use. Gibt (assistant_text, saved_items) zurück."""
+    saved_items = []
+    current_messages = list(messages)
+
+    while True:
         response = client.messages.create(
-            model="claude-haiku-4-5-20251001",
-            max_tokens=500,
-            messages=[{"role": "user", "content": extract_prompt}]
+            model=model,
+            max_tokens=8096,
+            system=system_prompt,
+            messages=current_messages,
+            tools=GWEN_TOOLS
         )
-        result = json.loads(response.content[0].text)
-        saved_items = []
 
-        if result.get("meilenstein", "").strip():
-            add_milestone(result["meilenstein"])
-            saved_items.append({"type": "meilenstein", "text": result["meilenstein"]})
+        if response.stop_reason == "tool_use":
+            # Assistenten-Antwort (mit Tool-Calls) als Dicts in History schreiben
+            assistant_content = []
+            for block in response.content:
+                if block.type == "text":
+                    assistant_content.append({"type": "text", "text": block.text})
+                elif block.type == "tool_use":
+                    assistant_content.append({
+                        "type": "tool_use",
+                        "id": block.id,
+                        "name": block.name,
+                        "input": block.input
+                    })
+            current_messages.append({"role": "assistant", "content": assistant_content})
 
-        if result.get("info", "").strip():
-            update_hub(f"[{section}] {result['info']}")
-            saved_items.append({"type": "info", "text": result["info"]})
+            # Tools ausführen und Ergebnisse sammeln
+            tool_results = []
+            for block in response.content:
+                if block.type == "tool_use":
+                    result = execute_tool(block.name, block.input)
+                    if result["preview"]:
+                        saved_items.append({"type": result["type"], "text": result["preview"]})
+                    tool_results.append({
+                        "type": "tool_result",
+                        "tool_use_id": block.id,
+                        "content": result["message"]
+                    })
 
-        for todo in result.get("todos", []):
-            if todo.strip():
-                save_todo("auto", todo)
-                saved_items.append({"type": "todo", "text": todo})
+            current_messages.append({"role": "user", "content": tool_results})
 
-        ziele = result.get("ziele", {})
-        if ziele.get("typ", "").strip() and ziele.get("inhalt", "").strip():
-            save_goals(ziele["typ"], ziele["inhalt"])
-            saved_items.append({"type": "ziel", "text": f"{ziele['typ']}: {ziele['inhalt'][:80]}"})
-        if ziele.get("erledigt", "").strip():
-            clear_goals(ziele["erledigt"])
-
-        return saved_items
-    except:
-        return []
+        else:
+            # Fertig — finalen Text zurückgeben
+            text = "".join(block.text for block in response.content if hasattr(block, "text"))
+            return text, saved_items
 
 
 # --- System Prompts je Bereich ---
@@ -665,7 +783,15 @@ WICHTIG:
 - Dein Name ist {assistant_name} — du bist {client_name}s persönliche Assistentin
 - Du bist kein generisches KI-Tool — du bist IHR Assistent
 - Du erinnerst dich an alles was in beiden Hubs steht — das ist dein Gedächtnis
-- Wichtige Erkenntnisse und Entscheidungen werden automatisch gespeichert
+
+DEINE TOOLS — PROAKTIV NUTZEN:
+Du hast Werkzeuge mit denen du direkt das Gedächtnis schreiben kannst. Nutze sie aktiv — warte nicht bis du gefragt wirst.
+- im_hub_speichern: Für neue Erkenntnisse, Entscheidungen, Status-Updates, Strategien, alles was dauerhaft relevant ist. Im Zweifel: speichern.
+- hub_abschnitt_aktualisieren: Wenn du weißt dass eine ältere Info überholt ist (z.B. neue Klientin, Preisänderung, neuer Status).
+- todo_hinzufuegen: Wenn ein konkreter nächster Schritt genannt wird.
+- ziel_setzen: Nur wenn {client_name} explizit ein Ziel formuliert.
+- meilenstein_hinzufuegen: Nur für wirklich besondere Ereignisse (erste Klientin, Launch, großer Abschluss).
+Du kannst mehrere Tools in einem Schritt aufrufen. {client_name} sieht direkt was du gespeichert hast.
 
 SCHREIBSTIL — ABSOLUT WICHTIG:
 - KEIN Markdown. Keine Sternchen (**), keine Rauten (##), keine Bindestriche als Aufzählung
@@ -835,19 +961,10 @@ def chat():
 
     messages = history + [{"role": "user", "content": user_content}]
 
-    response = client.messages.create(
-        model=model,
-        max_tokens=8096,
-        system=system_prompt,
-        messages=messages
-    )
-
-    assistant_message = response.content[0].text
+    assistant_message, saved_items = run_with_tools(system_prompt, messages, model)
 
     save_message(section, "user", user_message)
     save_message(section, "assistant", assistant_message)
-
-    saved_items = auto_extract_and_save(section, user_message, assistant_message)
 
     return jsonify({"response": assistant_message, "auto_saved": len(saved_items) > 0, "saved_items": saved_items})
 

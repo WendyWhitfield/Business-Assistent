@@ -192,8 +192,8 @@ async function sendMessage() {
     }
 }
 
-const SAVE_ICONS = { meilenstein: "🏆", info: "💾", todo: "✅", ziel: "🎯" };
-const SAVE_LABELS = { meilenstein: "Meilenstein", info: "Gespeichert", todo: "To-Do", ziel: "Ziel" };
+const SAVE_ICONS = { meilenstein: "🏆", info: "💾", hub_update: "📝", todo: "✅", ziel: "🎯" };
+const SAVE_LABELS = { meilenstein: "Meilenstein", info: "Gespeichert", hub_update: "Hub aktualisiert", todo: "To-Do", ziel: "Ziel" };
 
 function showSaveIndicator(savedItems) {
     if (!savedItems || savedItems.length === 0) return;
