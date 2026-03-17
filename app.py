@@ -29,6 +29,7 @@ SHOW_EMBODYBRAND = os.environ.get("SHOW_EMBODYBRAND", "true").lower() == "true"
 # Absolute Pfade (wichtig für Railway/Gunicorn)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "data")
+DEFAULTS_DIR = os.path.join(BASE_DIR, "defaults")
 DB_PATH = os.path.join(DATA_DIR, "assistant.db")
 HUB_PATH = os.path.join(DATA_DIR, "hub.md")
 ALLTAG_PATH = os.path.join(DATA_DIR, "alltag.md")
@@ -97,18 +98,23 @@ def _mem_set(key, value):
     conn.close()
 
 def _migrate_files_to_db():
-    """Einmalig: bestehende .md-Dateien in die DB übernehmen, dann Dateien behalten als Backup."""
+    """Einmalig: bestehende .md-Dateien in die DB übernehmen.
+    Fallback: defaults/-Ordner (im Git, überlebt Volume-Mounts)."""
     for key, path in [("hub", HUB_PATH), ("alltag", ALLTAG_PATH),
                       ("goals", GOALS_PATH), ("milestones", MILESTONES_PATH), ("archive", ARCHIVE_PATH)]:
         if _mem_get(key):
             continue  # Bereits in DB
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                content = f.read()
-            if content.strip():
-                _mem_set(key, content)
-        except:
-            pass
+        # Erst data/-Datei versuchen, dann defaults/-Fallback
+        default_path = os.path.join(DEFAULTS_DIR, os.path.basename(path))
+        for try_path in [path, default_path]:
+            try:
+                with open(try_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+                if content.strip():
+                    _mem_set(key, content)
+                    break
+            except:
+                continue
 
 def get_hub_content():
     return _mem_get("hub")

@@ -502,7 +502,11 @@ function initHub() {
                 body: JSON.stringify({ content })
             });
             hubContent.dataset.raw = content;
-            hubContent.textContent = content;
+            if (activeTab === "hub") {
+                hubContent.innerHTML = renderMarkdown(content);
+            } else {
+                hubContent.textContent = content;
+            }
             hubEditor.style.display = "none";
             hubContent.style.display = "block";
         } catch(e) {
@@ -548,7 +552,11 @@ async function loadMemoryTab(key) {
         const data = await res.json();
         const text = data.content || "(noch leer)";
         hubContent.dataset.raw = text;
-        hubContent.textContent = text;
+        if (key === "hub") {
+            hubContent.innerHTML = renderMarkdown(text);
+        } else {
+            hubContent.textContent = text;
+        }
     } catch(e) {
         hubContent.textContent = "Fehler beim Laden.";
     }
