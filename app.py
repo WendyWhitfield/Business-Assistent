@@ -895,7 +895,7 @@ def get_memory_key(key):
 
 @app.route("/api/memory/<key>", methods=["POST"])
 def set_memory_key(key):
-    allowed = ["hub", "goals"]  # Nur diese sind direkt editierbar
+    allowed = ["hub", "alltag", "goals", "milestones"]
     if key not in allowed:
         return jsonify({"error": "not allowed"}), 403
     data = request.json

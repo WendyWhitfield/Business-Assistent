@@ -221,12 +221,3 @@ Klientinnen-System (White-Label):
 - Wendy baut alles, befüllt Hub mit Wochenergebnissen aus EmbodyBRAND, übergibt fertige Assistentin + Onboarding-Video
 - EmbodyBRAND-Programm-Arbeit läuft bei Claude.ai — Gwen bekommt nur die fertigen Ergebnisse
 
----
-
-## OFFENE PRIORITÄTEN
-
-1. EmbodyBRAND.de fertig stellen und live bringen (Calendly-Link + E-Mail + 3 Fotos)
-2. Woche 1 und 2 fertigstellen und abfilmen
-3. EmbodyBRAND Selbstdurchlauf Woche 1 (bei Claude.ai)
-4. LinkedIn Akquise wieder starten
-5. Prozess dokumentieren
