@@ -6,23 +6,23 @@
 ## IDENTITÄT & POSITIONIERUNG
 
 Name: Wendy Whitfield
-Rolle: SOCIAL-Branding-Strategin & KI-Content-Systemerin
-Kernbotschaft: "Dein Kern. Deine Geschichte. Deine Brand. So unverwechselbar wie dein Fingerabdruck."
-Slogan: "Der Mensch macht es einzigartig. Die KI macht es skalierbar."
+Rolle: SOCIAL-Branding-Strategin
+Slogan "Dein Kern. Deine Geschichte. Deine Brand. So unverwechselbar wie dein Fingerabdruck."
+& "Der Mensch macht es einzigartig. Die KI macht es skalierbar."
 
 Superpower — das einzigartige Dreieck:
-1. Soziale Arbeit (15 Jahre): Menschenkenntnis, echtes Verständnis für Geschichten, Prägungen, Vertrauen, aktives Zuhören — Schulen, Kitas, Intensivwohngruppen, Suchthilfe
-2. Marketing & Copywriting: Strategie, Verkaufspsychologie, Social Media, E-Mail (Freedom-Writer-Academy)
-3. KI / Claude Code: Content-Systeme, Personalisierung, Automatisierung (Mentor Garrit / KIPA)
+1. Soziale Arbeit (15 Jahre): Menschenkenntnis, echtes Verständnis für Geschichten, Empathie, Prägungen, Vertrauen, BEZIEHUNGEN führen, aktives Zuhören. Hat gearbeitet an: Schulen, Kitas, Intensivwohngruppen, Suchthilfe
+2. Marketing & Copywriting: Strategie, Verkaufspsychologie, Social Media, Personal Branding
+3. KI / Claude und Claude Code:
 
-Schlüsselerkenntnis: Wo andere Brand Coaches aus dem Marketing kommen, bringt Wendy echtes Verständnis für Menschen, ihre Geschichten und ihre Prägungen mit. Marketing hat schon immer aus der Sozialen Arbeit geklaut. Das ist Wendys Superpower. KI ist das Tool, nicht das Angebot.
+Schlüsselerkenntnis: Wo andere Brand Coaches aus dem Marketing kommen, bringt Wendy echtes Verständnis für Menschen, ihre Geschichten und ihre Prägungen mit. Marketing hat schon immer aus der Sozialen Arbeit "geklaut" Das ist Beziehungen führen nur online ;). Das ist Wendys Superpower. KI ist das Tool, nicht das Angebot.
 
 Persönlich:
 - Seit März 2024 selbstständig
 - Vegan und wertebewusst
-- Verlobt mit Patrick. Vision: Camper-Leben, ortsunabhängig, Patrick muss nicht arbeiten
+- Verlobt mit Patrick. Vision: Camper-Leben, ortsunabhängig, Patrick muss nicht arbeiten, Mama kann in Rente gehen.
 - Nebenjob Soziale Arbeit läuft bis Mitte November 2026
-- Authentizität vor Perfektion: wartet nicht bis alles fertig ist — startet und zeigt den Prozess
+- Authentizität vor Perfektion: wartet nicht bis alles fertig ist, startet und zeigt den Prozess
 
 Plattformen (Reihenfolge): LinkedIn, Instagram, WhatsApp, Facebook, Threads, Skool
 
@@ -37,14 +37,14 @@ Dauer: 12 Wochen | Max. 2 neue Klientinnen pro Monat
 Ratenzahlung: Ja, Mehrkosten gehen auf die Klientin, Abwicklung über externen Anbieter (noch festzulegen)
 Kapazität: Ab Monat 4 rollierendes Modell mit bis zu 6 parallelen Klientinnen
 
-Was es ist: Tiefe biografische Markenarbeit + maßgeschneiderte KI-Assistentin. Kein Coaching, keine Therapie.
+Was es ist: Tiefe biografische Markenarbeit + individuelle KI-Assistentin. Kein Coaching, keine Therapie.
 
 Was EmbodyBRAND einzigartig macht:
 - 9 Wochen Lebensgeschichte — keine andere Brand-Coach macht das so tief
-- KI als Abschluss: die Assistentin klingt nach der Klientin, nicht nach Vorlage
+- KI als veganes Sahnehäubchen: die Assistentin klingt nach der Kundin, basierend auf der Personal Brand
 - Wendy als Beweis: Sie geht das Programm selbst durch und dokumentiert öffentlich
 
-**Phase 1: Biografische Tiefenarbeit (Woche 1–9)**
+Phase 1: Biografische Tiefenarbeit (Woche 1–9)
 Bestandsaufnahme zu Beginn: kurzes Video der Klientin (wer bin ich, wo stehe ich).
 Woche 1: "Es war einmal..." — Kindheit (0–9 Jahre)
 Woche 2: "Die ersten Male" — Jugend (10–16 Jahre)
@@ -72,12 +72,12 @@ Wöchentliche Struktur:
 WhatsApp-Chat: alle Programminhalte laufen über individuellen EmbodyBRAND-Chat
 Sprache: Deutsch
 
-**Phase 2: Die KI-Assistentin (Woche 10–12)**
+Phase 2: Die KI-Assistentin (Woche 10–12)
 Woche 10: Kick-Off — Fragebogen, was die Assistentin können soll, Zugänge einrichten
 Woche 11–12: Wendy baut alles alleine (done for you)
 Mögliche Bereiche: Content, Marketing, Vertrieb, Strategie, Angebote, Ziele, Check-in/out, Todos, Onboarding für Freelancer/VAs
 
-Deliverables: Vollständiges Workbook + Brandstory-Dokument + fertige KI-Assistentin (Gwen-Instanz)
+Deliverables: Biografische Arbeit, Brandstory-Dokument + fertige KI-Assistentin (Gwen-Instanz) + Einweisung ins System
 
 ---
 
@@ -86,7 +86,7 @@ Deliverables: Vollständiges Workbook + Brandstory-Dokument + fertige KI-Assiste
 Preis: 400€/Monat (inkl. aller laufenden Kosten)
 Enthält:
 - Monatlicher Strategie-Call
-- WhatsApp-Begleitung Mo–Do 9–15 Uhr, Umsetzung innerhalb 24h
+- WhatsApp-Begleitung Mo–Do 9–15 Uhr, Umsetzung innerhalb der Öffnungszeiten in 24h
 - Technischer Rückhalt: Railway, API, neue Gwen-Bereiche, alle Updates
 - Alle laufenden Kosten inklusive (API ca. 20€ + Railway ca. 6€)
 Kalkulation: ca. 370€ brutto / ca. 160€ netto
@@ -97,21 +97,29 @@ Positionierung: Brand Intelligence Partnerschaft, kein Support
 
 ## IDEALKLIENTIN
 
-Wer sie ist:
-- Etablierte Unternehmerin/Solopreneurin, deutschsprachig, 30–50 Jahre
-- Monatsumsatz 5.000–15.000€, hat sich alles selbst aufgebaut
-- Digital affin, aktiv auf LinkedIn & Instagram
-- Nutzt KI bereits, merkt aber: ohne Fundament bleibt es generisch
-- Keine Anfängerin. Das Fundament steht.
+Etablierte Businessfrauen und Solopreneurinnen, die ihr Business bereits aufgebaut haben und funktionieren. Sie haben ein klares Angebot, eine definierte Zielgruppe, eine Positionierung und einen Monatsumsatz von mindestens 5.000€. Sie sind keine Anfängerinnen. Sie halten ihr Business größtenteils selbst am Laufen, arbeiten vielleicht mit ein, zwei Freelancern oder einer VA, aber der Motor sind sie selbst.
 
-Ihr innerer Schmerz:
-- Content fühlt sich nicht nach ihr an. Postet weil sie muss, nicht weil sie brennt.
-- Selbständig um frei zu sein — fühlt sich manchmal wie ein selbst gebauter Käfig an.
-- Vergleicht sich, weiß sie ist gut — fühlt sich aber noch nicht angekommen
+Aktueller Zustand
 
-Was sie wirklich kauft: Gesehen werden. Entlastung. Geschichte als Kraft. Klare Identität. Bestand.
-Wunschzustand: Brand die sich anfühlt wie sie. Roter Faden. KI die wirklich sie skaliert. Keine langen Erklärungen mehr.
-Wer NICHT passt: Frauen ohne laufendes Business. Wer keine Tiefenarbeit will. Ergebnisse ohne Eigeninvestment.
+Sie haben die harte Aufbauphase hinter sich. Aber in dieser Phase ist Personal Branding entweder nebenbei passiert oder gar nicht. Sie haben gehustlt, positioniert, skaliert — und sich dabei selbst ein Stück verloren. Jetzt läuft das Business, aber es fühlt sich noch nicht ganz nach ihr an. Sie probiert Trends aus, testet Visuals, schaut was andere machen — aber irgendetwas stimmt noch nicht. Sie scrollt durch ihr eigenes Profil und denkt: noch nicht ganz.
+
+Sie nutzt KI bereits und ist grundsätzlich happy damit. KI macht sie schneller. Aber sie merkt: Sie muss noch viel selbst nachsteuern, viel erklären, viel korrigieren. Weil das Fundament fehlt. Die Brand. Die Stimme. Der rote Faden. Ohne das bleibt auch die beste KI generisch.
+
+Schmerzpunkte
+
+Sie vergleicht sich mit anderen, die schon weiter zu sein scheinen. Sie weiß, dass sie gut ist — aber sie fühlt sich noch nicht wirklich angekommen. Ihr Content funktioniert, aber er hat keinen roten Faden. Ihre Außenpräsenz spiegelt noch nicht wider, wer sie wirklich ist. Sie möchte wiedererkannt werden. Sie möchte Leichtigkeit. Sie möchte entlastet werden — vom ständigen Nachsteuern, vom Erklären, vom Gefühl, dass noch etwas fehlt.
+
+Der Wendepunkt
+
+Irgendwann reicht es. Sie entscheidet: Ich mache das jetzt. Nicht noch ein Trend, nicht noch ein Template. Sie möchte, dass ihr Business auf ihr basiert. Auf ihrer Geschichte, ihrer Persönlichkeit, ihrem Warum. Sie möchte wiedererkannt werden. Sie möchte in ihr Profil schauen und lächeln. Sie möchte aufhören, sich zu vergleichen — weil sie endlich sie selbst ist. Und sie möchte eine KI, die das skaliert. Nicht irgendwie. Sondern wirklich sie.
+
+Das ist der Moment, in dem sie zu EmbodyBRAND kommt.
+
+Wunschzustand
+
+Sie hat eine Brand, die sich anfühlt wie sie. Einen roten Faden, der sich durch alles zieht. Eine Außenpräsenz, die sie selbstbewusst nach vorne trägt. Komplette Klarheit darüber, wer sie ist und was sie nach außen trägt. Content fällt leichter, weil das Fundament steht. Und eine KI-Assistentin, die genau das skaliert — ihre Stimme, ihre Haltung, ihr Warum. Die auch als Onboarding-Tool funktioniert: Freelancer und VAs bekommen Zugang zum System und wissen sofort, wie sie für diese Frau arbeiten. Keine langen Erklärungen mehr. Einfach loslegen.
+
+So unverwechselbar wie ihr Fingerabdruck. Und endlich leicht.
 
 ---
 
@@ -121,15 +129,29 @@ PREMIUM. IMMER. Wendy verkauft 13.000€.
 Test: "Boah, genau so ist das" = stimmt. "Schön formuliert" = stimmt nicht.
 
 Wie Wendy schreibt:
-- Kurze Sätze. Viel Luft. Manchmal ein Wort pro Zeile.
-- CAPS statt fett. "..." als Pause. Bricht die vierte Wand.
-- Selbstsicher ohne zu prahlen. Fragen die wehtun, aber sanft.
+- Leicht verständlich. Oft umgangssprachlich. Viel Luft. Manchmal ein Wort pro Zeile.
+- CAPS statt fett. "..." als Pause.
+- Selbstsicher ohne zu prahlen. Fragen die zum nachdenken anregen.
+- Immer ehrlich und direkt
+- Schreib wie sie denkt
+- BILDHAFTE Sprache (Phantasie)
+- Schweift gerade auch mal sympathisch ab wenn der Kontext passt
 
-Echte Wörter: krass, geil, Bock, auf jeden, Schwöree, halt, ne, zack, Pustekuchen
-Emojis: Herz-Orange (Signatur), max 2–3 — nie dekorativ
-Signatur: Wendy + Herz + BRAND VOICE | KI | MARKETING | COPYWRITING | BEVEGAN
+Echte Wörter: krass, geil, Bock, auf jeden, Schwöree, halt, ne, zack, Pustekuchen, "isso", "wat is dat denn", "voll nicht", "ich sag's dir wie's is...", "schwachsinn", "komm schon", "bli bla blub", "Hätte hätte Fahrradkette", ... (und vieles mehr)
+Emojis: 🧡🌼🌱🥰🤷🏼‍♀️🥹😂😅🥳
+Bulletpoints: ⚜️
 
-VERBOTEN: "Nicht X sondern Y" / Dreier-Phrasen / Buzzwords / Anfänger-Energie
+Signatur unter jedem Contentpost:
+
+Schreib mir gern 'ne DM.🧡
+
+Wendy
+🌼
+
+PERSONAL BRANDING | KI | MARKETING | COPYWRITING | BEVEGAN🌱
+
+VERBOTEN: "Nicht X sondern Y"-Konstruktionen / Dreier-Phrasen / Buzzwords / Anfänger-Energie / KI-FLOSKELN / Worthülsen
+Keine Wörter wie: Gamechanger, Haltung die trägt, Next level, PS auf die Straße ODER ÄHNLICHES!!
 
 ---
 
@@ -161,20 +183,21 @@ Hauptziel: 13.000€ netto/Monat bis November 2026
 Nebenjob Soziale Arbeit läuft parallel bis Mitte November 2026
 
 Vertrieb:
-- LinkedIn-Akquise läuft seit 02.03. (15/Tag)
-- Beta-Klientinnen: Lena (3.000+ Follower Instagram) + Nadine (1.000+ Follower Instagram)
-  Start: 19.03.2026 | Erster Call: 26.03.2026
+- LinkedIn-Akquise läuft leider gerade nicht.
+- Beta-Klientinnen sind ongeboardet: Lena (3.000+ Follower Instagram) + Nadine (1.000+ Follower Instagram)
+  Start: 19.03.2026 mit erste Woche | Erster Call: 26.03.2026
   Kostenlos als Beta — posten wöchentlich auf Instagram, Testimonial am Ende
-- Nächstes Webinar: 06.04.2026
+- Webinar für KI-Community startet: 06.04.2026 (öffentlich) und dann vom 14-16.04. startet eine dreitägige Schulung zu Claude Projekten
 
 Marketing:
-- Brand Voice fertig ✅ | Karussell 1+2 fertig | Karussell 3 offen
-- Landingpage EmbodyBRAND.de: gebaut, noch nicht live (Calendly + E-Mail + 3 Fotos fehlen)
+- Karussell 1, 2 & 3 fertig
+- Profile angepasst an EmbodyBRAND und der Positionierung
+- Landingpage EmbodyBRAND.de: muss noch angepasst werden, noch nicht live (Calendly + E-Mail + 3 Fotos fehlen)
+- Erste Woche EmbodyBRAND vorbereiten und abfilmen (und alle weiteren Wochen) fertig machen
 
 Eigener EmbodyBRAND-Durchlauf:
 - Wird bei Claude.ai durchgeführt (nicht in Gwen)
-- Woche 1 (Der Urmensch) abgeschlossen ✅
-- Woche 2 offen
+- Woche 1 (Der Urmensch) die Impulsfrage abgeschlossen, jetzt geht's weiter mit den Fragen
 
 ---
 
@@ -202,8 +225,8 @@ Klientinnen-System (White-Label):
 
 ## OFFENE PRIORITÄTEN
 
-1. EmbodyBRAND.de live (Calendly-Link + E-Mail + 3 Fotos)
-2. Setting Call Fragen finalisieren
-3. Karussell 3 erstellen
-4. EmbodyBRAND Selbstdurchlauf Woche 2 (bei Claude.ai)
-5. Client-Template fertigstellen
+1. EmbodyBRAND.de fertig stellen und live bringen (Calendly-Link + E-Mail + 3 Fotos)
+2. Woche 1 und 2 fertigstellen und abfilmen
+3. EmbodyBRAND Selbstdurchlauf Woche 1 (bei Claude.ai)
+4. LinkedIn Akquise wieder starten
+5. Prozess dokumentieren
