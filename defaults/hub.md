@@ -1,5 +1,5 @@
 # HUB — Wendy Whitfield
-> Gwens Kern-Gedächtnis. Stand: 18.03.2026
+> Gwens Kern-Gedächtnis. Stand: 23.04.2026
 
 ---
 
@@ -177,27 +177,32 @@ Setting Call: Kein Verkauf. Echtes Kennenlernen. Wendy entscheidet auch.
 
 ---
 
-## AKTUELLER STATUS (18.03.2026)
+## AKTUELLER STATUS (23.04.2026)
 
-Hauptziel: 13.000€ netto/Monat bis November 2026
-Nebenjob Soziale Arbeit läuft parallel bis Mitte November 2026
+Hauptziel: 13.000€ netto/Monat
+Nebenjob Soziale Arbeit: verloren (März 2026) — kein Sicherheitsnetz mehr, Fokus voll auf Selbstständigkeit
+
+EmbodyBRAND Programm:
+- Beta-Klientinnen laufen: Nadine (Woche 5) + Lena (Woche 4) — seit 19.03.2026
+- Programm funktioniert, öffnet Augen, findet roten Faden ✅
+- Eigener Selbstdurchlauf: noch Woche 1 — wird wieder aufgenommen
 
 Vertrieb:
-- LinkedIn-Akquise läuft leider gerade nicht.
-- Beta-Klientinnen sind ongeboardet: Lena (3.000+ Follower Instagram) + Nadine (1.000+ Follower Instagram)
-  Start: 19.03.2026 mit erste Woche | Erster Call: 26.03.2026
-  Kostenlos als Beta — posten wöchentlich auf Instagram, Testimonial am Ende
-- Webinar für KI-Community startet: 06.04.2026 (öffentlich) und dann vom 14-16.04. startet eine dreitägige Schulung zu Claude Projekten
+- LinkedIn-Akquise aktuell pausiert — startet nach Landingpage-Launch
+- Landingpage EmbodyBRAND.de: noch nicht live (Calendly + E-Mail + 3 Fotos fehlen)
+- Neue Kooperation: Schulungen in Lena Fuchs' Community (Termin steht)
 
 Marketing:
-- Karussell 1, 2 & 3 fertig
-- Profile angepasst an EmbodyBRAND und der Positionierung
-- Landingpage EmbodyBRAND.de: muss noch angepasst werden, noch nicht live (Calendly + E-Mail + 3 Fotos fehlen)
-- Erste Woche EmbodyBRAND vorbereiten und abfilmen (und alle weiteren Wochen) fertig machen
+- Sprechreels laufen als Hauptformat ✅
+- 3 Karussells fertig (Story, Angebot, Warum) ✅
+- Offene Frage: Zielgruppenansprache für High-Ticket schärfen
 
-Eigener EmbodyBRAND-Durchlauf:
-- Wird bei Claude.ai durchgeführt (nicht in Gwen)
-- Woche 1 (Der Urmensch) die Impulsfrage abgeschlossen, jetzt geht's weiter mit den Fragen
+Neue Einnahmequellen:
+- KI-Schulungen: Webinar (210 Teilnehmer) + 3-Tages-Schulung → ~1.400€ ✅
+- Easy Content (Onlineprodukt): 5 Videos + 5 Dateien, Deadline 08.05.2026
+- CloseIT Academy: Ausbildung zur Closerin/Setterin läuft
+
+Aktuell in München: KI-Event / Hackathon 24.–25.04.2026 (AIOS aufbauen)
 
 ---
 
@@ -209,11 +214,14 @@ Lokal: python app.py → http://localhost:5000
 Gwens Fähigkeiten:
 - Chat in allen Bereichen (Haiku Standard / Sonnet per Toggle)
 - Automatisches Speichern: Meilensteine, Entscheidungen, Ziele, To-Dos (Tool Use)
+- Notizbuch (📓): freie Gedanken + Ideen mit Tag speichern ✅ (neu 23.04.2026)
+- Suche: quer durch Hub, Notizen, Verbindungen, Alltag, Chat ✅ (neu 23.04.2026)
+- Verbindungen: Gwen erkennt aktiv Muster und verknüpft Themen ✅ (neu 23.04.2026)
 - Tages-Gedächtnis (alle Nachrichten des Tages pro Bereich)
 - Freitags: Wochengedächtnis komprimiert → Archiv
-- Memory-Tabs: Hub / Alltag / Ziele / Meilensteine direkt sichtbar
+- Memory-Tabs: Hub / Alltag / Ziele / Meilensteine / Notizen / Verbindungen / Suche
 - Hub-Editor: direkt bearbeitbar
-- Railway Volume: Gedächtnis überlebt Redeploys ✅ (18.03.2026 bestätigt)
+- Railway Volume: Gedächtnis überlebt Redeploys ✅
 
 Klientinnen-System (White-Label):
 - Env-Variablen: CLIENT_NAME, ASSISTANT_NAME (einfach konfigurierbar)
