@@ -53,7 +53,7 @@ function initIdeasToggle() {
             btn.classList.remove("active");
         } else {
             btn.classList.add("active");
-            switchSection("gedanken", "Ideen, Gedanken & Notizen");
+            switchSection("gedanken", "Notizbuch");
         }
     });
 }
