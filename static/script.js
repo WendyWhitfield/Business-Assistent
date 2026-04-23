@@ -192,8 +192,8 @@ async function sendMessage() {
     }
 }
 
-const SAVE_ICONS = { meilenstein: "🏆", info: "💾", hub_update: "📝", todo: "✅", ziel: "🎯" };
-const SAVE_LABELS = { meilenstein: "Meilenstein", info: "Gespeichert", hub_update: "Hub aktualisiert", todo: "To-Do", ziel: "Ziel" };
+const SAVE_ICONS = { meilenstein: "🏆", info: "💾", hub_update: "📝", todo: "✅", ziel: "🎯", notiz: "💡", verbindung: "🔗" };
+const SAVE_LABELS = { meilenstein: "Meilenstein", info: "Gespeichert", hub_update: "Hub aktualisiert", todo: "To-Do", ziel: "Ziel", notiz: "Notiz", verbindung: "Verbindung" };
 
 function showSaveIndicator(savedItems) {
     if (!savedItems || savedItems.length === 0) return;
@@ -519,16 +519,26 @@ function initHub() {
 
     // Tabs
     let activeTab = "hub";
-    const editableTabs = ["hub", "goals"];
+    const editableTabs = ["hub", "goals", "notizen"];
+    const hubSearch = document.getElementById("hubSearch");
     document.querySelectorAll(".mem-tab").forEach(tab => {
         tab.addEventListener("click", async () => {
             document.querySelectorAll(".mem-tab").forEach(t => t.classList.remove("active"));
             tab.classList.add("active");
             activeTab = tab.dataset.tab;
             hubEditor.style.display = "none";
-            hubContent.style.display = "block";
-            hubEditBtn.style.display = editableTabs.includes(activeTab) ? "inline-block" : "none";
-            await loadMemoryTab(activeTab);
+
+            if (activeTab === "suche") {
+                hubContent.style.display = "none";
+                hubSearch.style.display = "block";
+                hubEditBtn.style.display = "none";
+                document.getElementById("searchInput").focus();
+            } else {
+                hubSearch.style.display = "none";
+                hubContent.style.display = "block";
+                hubEditBtn.style.display = editableTabs.includes(activeTab) ? "inline-block" : "none";
+                await loadMemoryTab(activeTab);
+            }
         });
     });
 
@@ -541,6 +551,42 @@ function initHub() {
 
     hubClose.addEventListener("click", () => {
         hubPanel.classList.remove("open");
+    });
+
+    // Suche
+    const searchBtn = document.getElementById("searchBtn");
+    const searchInput = document.getElementById("searchInput");
+    const searchResults = document.getElementById("searchResults");
+
+    async function runSearch() {
+        const query = searchInput.value.trim();
+        if (!query) return;
+        searchResults.innerHTML = "<p style='color:#888;font-size:13px'>Suche läuft…</p>";
+        try {
+            const res = await fetch("/api/search", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ query })
+            });
+            const data = await res.json();
+            if (!data.results || data.results.length === 0) {
+                searchResults.innerHTML = "<p style='color:#888;font-size:13px'>Nichts gefunden.</p>";
+                return;
+            }
+            searchResults.innerHTML = data.results.map(r => `
+                <div class="search-result">
+                    <div class="search-result-source">${escapeHtml(r.source)}</div>
+                    <div class="search-result-text">${escapeHtml(r.text)}</div>
+                </div>
+            `).join("");
+        } catch(e) {
+            searchResults.innerHTML = "<p style='color:#c00;font-size:13px'>Fehler bei der Suche.</p>";
+        }
+    }
+
+    searchBtn.addEventListener("click", runSearch);
+    searchInput.addEventListener("keydown", e => {
+        if (e.key === "Enter") runSearch();
     });
 }
 

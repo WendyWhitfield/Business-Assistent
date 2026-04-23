@@ -127,6 +127,27 @@ def get_milestones_content():
 def get_archive_content():
     return _mem_get("archive")
 
+def get_notizen_content():
+    return _mem_get("notizen")
+
+def get_verbindungen_content():
+    return _mem_get("verbindungen")
+
+def add_notiz(tag, text):
+    """Hängt eine neue Notiz/Gedanke an — mit Datum und optionalem Tag."""
+    date = now_berlin().strftime('%d.%m.%Y')
+    tag_clean = tag.strip() if tag else "allgemein"
+    entry = f"[{date} | {tag_clean}]\n{text}\n"
+    current = _mem_get("notizen") or "# NOTIZEN\n\n"
+    _mem_set("notizen", current + "\n---\n" + entry)
+
+def add_verbindung(text):
+    """Speichert eine erkannte Verbindung zwischen Themen."""
+    date = now_berlin().strftime('%d.%m.%Y')
+    entry = f"[{date}] {text}\n"
+    current = _mem_get("verbindungen") or "# VERBINDUNGEN\n\n"
+    _mem_set("verbindungen", current + entry)
+
 def get_archive_for_review(section):
     """Gibt relevante Archiv-Einträge für den jeweiligen Rückblick zurück."""
     content = get_archive_content()
@@ -488,6 +509,38 @@ GWEN_TOOLS = [
             },
             "required": ["meilenstein"]
         }
+    },
+    {
+        "name": "notiz_speichern",
+        "description": "Speichert einen Gedanken, eine Idee oder Beobachtung im Notizbuch — mit einem Themen-Tag. Nutze das für: Ideen die noch nicht spruchreif sind, spontane Beobachtungen, Inspirationen, persönliche Erkenntnisse, Content-Ideen.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "tag": {
+                    "type": "string",
+                    "description": "Themen-Tag (z.B. 'Content-Idee', 'Positionierung', 'Klientin', 'Persönlich', 'Strategie')"
+                },
+                "inhalt": {
+                    "type": "string",
+                    "description": "Der Gedanke oder die Idee im vollen Wortlaut"
+                }
+            },
+            "required": ["tag", "inhalt"]
+        }
+    },
+    {
+        "name": "verbindung_notieren",
+        "description": "Notiert eine erkannte Verbindung zwischen zwei Themen, Ideen oder Mustern. Nutze das wenn du Zusammenhänge siehst die für Wendy relevant sind — z.B. ein Muster das sich wiederholt, oder eine Verbindung zwischen ihrer Biografie und ihrem Business.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "verbindung": {
+                    "type": "string",
+                    "description": "Die Verbindung klar beschrieben: Was hängt womit zusammen, und warum ist das relevant?"
+                }
+            },
+            "required": ["verbindung"]
+        }
     }
 ]
 
@@ -521,6 +574,17 @@ def execute_tool(name, input_data):
         meilenstein = input_data.get("meilenstein", "")
         add_milestone(meilenstein)
         return {"type": "meilenstein", "preview": meilenstein, "message": f"Meilenstein gespeichert."}
+
+    elif name == "notiz_speichern":
+        tag = input_data.get("tag", "allgemein")
+        inhalt = input_data.get("inhalt", "")
+        add_notiz(tag, inhalt)
+        return {"type": "notiz", "preview": f"[{tag}] {inhalt}", "message": f"Notiz gespeichert."}
+
+    elif name == "verbindung_notieren":
+        verbindung = input_data.get("verbindung", "")
+        add_verbindung(verbindung)
+        return {"type": "verbindung", "preview": verbindung, "message": f"Verbindung notiert."}
 
     return {"type": "unknown", "preview": "", "message": "Unbekanntes Tool"}
 
@@ -602,6 +666,11 @@ Der Ton ist wie eine WhatsApp-Nachricht von einer Assistentin die mitdenkt. Warm
     "setting-call": "Du bereitest Wendy auf Setting Calls vor. Du kennst das Skript, die Qualifizierungskriterien, typische Antworten und wie man das Gespräch führt.",
     "verkaufsgespraech": "Du hilfst beim Closing. Du kennst EmbodyBRAND in- und auswendig, typische Einwände und wie man authentisch verkauft ohne Druck.",
     "follow-ups": "Du schreibst Follow-Up Nachrichten — warm, ohne Druck, mit echtem Interesse. Max. 5 Sätze. Immer mit Bezug zum Gespräch.",
+    "gedanken": """Du bist Wendys Notizbuch und Gedankenfänger. Hier darf alles rein — roh, unfertig, halbgar.
+Deine Aufgabe: Gedanken empfangen, kurz spiegeln, mit notiz_speichern festhalten.
+Dann aktiv nach Verbindungen suchen: "Das klingt nach dem was du am [Datum] über [Thema] gesagt hast — stimmt das?"
+Kein langer Chat — kurze Bestätigung, dann speichern. Der Fokus liegt auf dem Festhalten, nicht auf dem Ausarbeiten.
+Wenn Wendy einen Gedanken teilt der eindeutig mit etwas aus Hub oder Verbindungen zusammenhängt: nutze verbindung_notieren.""",
     "ideen-entwicklung": "Du bist Wendys Sparring-Partner für Angebotsentwicklung. Hier darf philosophiert werden. Keine falschen Antworten. Ideen dürfen wild sein.",
     "embodybrand-programm": "Du kennst EmbodyBRAND vollständig: Struktur, Wochen 1-12, Deliverables, Preise, Zielgruppe. Du hilfst das Programm weiterzuentwickeln und zu verfeinern.",
     "schulungen-workshops": "Du hilfst Wendy Webinare, Schulungen und Workshops zu planen, zu entwickeln und vorzubereiten.",
@@ -673,6 +742,19 @@ Wenn neue Ziele festgelegt werden, ersetzen sie die alten — nichts häuft sich
 
 MEILENSTEINE — was {client_name} bereits erreicht hat (dauerhaft, wächst langsam):
 {milestones}
+
+NOTIZEN & GEDANKEN — spontane Ideen, Beobachtungen, noch nicht fertig gedacht:
+{notizen}
+
+ERKANNTE VERBINDUNGEN — Muster und Zusammenhänge die du bereits notiert hast:
+{verbindungen}
+
+SECOND BRAIN — DEINE AUFGABE:
+Du bist nicht nur Assistentin — du bist auch Wendys aktives Gedächtnis.
+Das bedeutet: Wenn du in einem Gespräch etwas hörst das mit etwas aus Notizen, Hub oder früheren Gesprächen zusammenhängt — sag es. Aktiv. Nicht auf Anfrage.
+Beispiel: "Das klingt nach dem was du letzten Monat über deine Zielgruppe notiert hast — soll ich die Verbindung zeigen?"
+Nutze notiz_speichern großzügig — auch für halbfertige Gedanken. Notizen dürfen roh sein.
+Nutze verbindung_notieren wenn du ein echtes Muster erkennst. Nicht bei jeder Kleinigkeit — aber wenn du denkst: "Das hängt zusammen."
 """
 
 WOCHENTAGE = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
@@ -682,17 +764,21 @@ def build_system(section):
     alltag = get_alltag_content()
     goals = get_goals_content()
     milestones = get_milestones_content()
+    notizen = get_notizen_content()
+    verbindungen = get_verbindungen_content()
     todos = get_open_todos()
     todos_text = "\n".join([f"- [{t['type']}] {t['text']}" for t in todos]) if todos else "Keine offenen To-Do's"
     goals_text = goals if goals.strip() else "Noch keine Ziele festgelegt."
     milestones_text = milestones if milestones.strip() else "Noch keine Meilensteine eingetragen."
+    notizen_text = notizen if notizen and notizen.strip() else "Noch keine Notizen."
+    verbindungen_text = verbindungen if verbindungen and verbindungen.strip() else "Noch keine Verbindungen erkannt."
     section_instruction = SECTION_PROMPTS.get(section, "Du hilfst Wendy in diesem Bereich.")
 
     now = now_berlin()
     wochentag = WOCHENTAGE[now.weekday()]
     datum_text = f"{wochentag}, {now.strftime('%d.%m.%Y')} — {now.strftime('%H:%M')} Uhr (Berliner Zeit)"
 
-    system = BASE_SYSTEM.replace("{hub}", hub).replace("{alltag}", alltag).replace("{todos}", todos_text).replace("{goals}", goals_text).replace("{milestones}", milestones_text)
+    system = BASE_SYSTEM.replace("{hub}", hub).replace("{alltag}", alltag).replace("{todos}", todos_text).replace("{goals}", goals_text).replace("{milestones}", milestones_text).replace("{notizen}", notizen_text).replace("{verbindungen}", verbindungen_text)
     system = system.replace("{datum}", datum_text)
     system = system.replace("{client_name}", CLIENT_NAME).replace("{assistant_name}", ASSISTANT_NAME)
     # Für Rückblick-Sections: relevantes Archiv dazu laden
@@ -888,14 +974,14 @@ def api_clear_goals():
 
 @app.route("/api/memory/<key>", methods=["GET"])
 def get_memory_key(key):
-    allowed = ["hub", "alltag", "goals", "milestones", "archive"]
+    allowed = ["hub", "alltag", "goals", "milestones", "archive", "notizen", "verbindungen"]
     if key not in allowed:
         return jsonify({"error": "not found"}), 404
     return jsonify({"content": _mem_get(key) or ""})
 
 @app.route("/api/memory/<key>", methods=["POST"])
 def set_memory_key(key):
-    allowed = ["hub", "alltag", "goals", "milestones"]
+    allowed = ["hub", "alltag", "goals", "milestones", "notizen"]
     if key not in allowed:
         return jsonify({"error": "not allowed"}), 403
     data = request.json
@@ -986,6 +1072,61 @@ Dokumentinhalt:
         return jsonify({"text": text, "filename": filename, "summarized": False})
     except Exception as e:
         return jsonify({"error": f"Fehler beim Lesen: {str(e)}"}), 500
+
+
+@app.route("/api/search", methods=["POST"])
+def search():
+    data = request.json
+    query = data.get("query", "").strip().lower()
+    if not query or len(query) < 2:
+        return jsonify({"results": []})
+
+    terms = query.split()
+    results = []
+
+    sources = [
+        ("Hub", _mem_get("hub")),
+        ("Notizen", _mem_get("notizen")),
+        ("Verbindungen", _mem_get("verbindungen")),
+        ("Alltag", _mem_get("alltag")),
+        ("Meilensteine", _mem_get("milestones")),
+        ("Ziele", _mem_get("goals")),
+    ]
+
+    for source_name, content in sources:
+        if not content:
+            continue
+        paragraphs = [p.strip() for p in content.split("\n\n") if p.strip() and len(p.strip()) > 10]
+        for para in paragraphs:
+            para_lower = para.lower()
+            if all(term in para_lower for term in terms):
+                results.append({
+                    "source": source_name,
+                    "text": para[:300] + ("…" if len(para) > 300 else "")
+                })
+
+    # Chat-Verlauf durchsuchen
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute(
+            "SELECT section, role, content, timestamp FROM messages WHERE LOWER(content) LIKE ? ORDER BY id DESC LIMIT 8",
+            (f"%{terms[0]}%",)
+        )
+        rows = c.fetchall()
+        conn.close()
+        for section, role, content, ts in rows:
+            content_lower = content.lower()
+            if all(term in content_lower for term in terms):
+                date = ts[:10] if ts else ""
+                results.append({
+                    "source": f"Chat · {section} ({date})",
+                    "text": content[:250] + ("…" if len(content) > 250 else "")
+                })
+    except:
+        pass
+
+    return jsonify({"results": results[:15]})
 
 
 init_db()
