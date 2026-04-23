@@ -220,10 +220,31 @@ body {
     cursor: pointer;
     font-weight: 500;
     transition: all 0.15s;
+    white-space: nowrap;
 }
 
 .hub-toggle:hover {
     background: rgba(255,255,255,0.35);
+}
+
+.ideas-toggle {
+    font-size: 12px;
+    padding: 6px 14px;
+    background: rgba(252, 167, 61, 0.15);
+    color: var(--brown);
+    border: 1.5px solid var(--orange);
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+
+.ideas-toggle:hover,
+.ideas-toggle.active {
+    background: var(--orange);
+    color: white;
+    border-color: var(--orange);
 }
 
 /* === MESSAGES === */

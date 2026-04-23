@@ -17,6 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initImageUpload();
     initDocUpload();
     initModelToggle();
+    initIdeasToggle();
     switchSection("check-in", "Check-In");
 });
 
@@ -44,6 +45,19 @@ function initNavigation() {
     });
 }
 
+function initIdeasToggle() {
+    const btn = document.getElementById("ideasToggle");
+    if (!btn) return;
+    btn.addEventListener("click", () => {
+        if (currentSection === "gedanken") {
+            btn.classList.remove("active");
+        } else {
+            btn.classList.add("active");
+            switchSection("gedanken", "Ideen, Gedanken & Notizen");
+        }
+    });
+}
+
 async function saveCurrentSession() {
     if (!currentSection || currentSection === "home") return;
     try {
@@ -63,6 +77,8 @@ async function switchSection(section, label) {
     if (currentSection === "check-in") checkinDone = true;
     currentSection = section;
     document.getElementById("sectionLabel").textContent = label;
+    const ideasBtn = document.getElementById("ideasToggle");
+    if (ideasBtn) ideasBtn.classList.toggle("active", section === "gedanken");
 
     document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
     document.querySelector(`[data-section="${section}"]`)?.classList.add("active");
